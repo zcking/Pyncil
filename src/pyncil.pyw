@@ -24,6 +24,10 @@ class PyncilApp(QDialog):
         self.appTitle = 'Pyncil'
         self.currentFileName = ''
 
+        # Load the configuration
+        self.config = configparser.ConfigParser()
+        self.config.read('config/settings.ini')
+
         # Minimum dimensions
         self.setMinimumWidth(500)
         self.setMinimumHeight(400)
@@ -39,7 +43,7 @@ class PyncilApp(QDialog):
     def makeWidgets(self):
         """Create and setup the widgets"""
         # Main editor
-        self.editor = QTextEdit()
+        self.setupEditor()
 
         # Status bar
         self.statusBar = QStatusBar()
@@ -66,6 +70,20 @@ class PyncilApp(QDialog):
 
         # Initial UI Updates
         self.updateStatusBar()
+
+    def setupEditor(self):
+        self.font = QFont()
+        try:
+            self.font.setFamily(self.config['Editor']['Font'])
+            self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch'))
+            self.font.setPointSize(self.config.getint('Editor', 'FontSize'))
+        except Exception as e:
+            self.font.setFamily('Courier')
+            self.font.setFixedPitch(True)
+            self.font.setPointSize(11)
+
+        self.editor = QTextEdit()
+        self.editor.setFont(self.font)
 
     def setupFileMenu(self):
         self.fileMenu = QMenu('&File')
@@ -138,22 +156,22 @@ class PyncilApp(QDialog):
         pass
 
     def undo(self):
-        pass
+        self.editor.undo()
 
     def redo(self):
-        pass
+        self.editMenu.redo()
 
     def cut(self):
-        pass
+        self.editor.cut()
 
     def copy(self):
-        pass
+        self.editor.copy()
 
     def paste(self):
-        pass
+        self.editor.paste()
 
     def selectAll(self):
-        pass
+        self.editor.selectAll()
 
     def find(self):
         pass
