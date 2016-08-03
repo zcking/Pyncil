@@ -12,7 +12,7 @@ for writing Python.
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import sys
+import sys, os
 import configparser
 
 
@@ -23,6 +23,7 @@ class PyncilApp(QMainWindow):
 
         self.appTitle = 'Pyncil'
         self.currentFileName = 'Untitled'
+        self.currentFilePath = os.getcwd()
         self.firstSave = True
 
         # Load the configuration
@@ -34,11 +35,6 @@ class PyncilApp(QMainWindow):
 
         # Create the widgets
         self.makeWidgets()
-
-        if self.currentFileName != '':
-            self.setWindowTitle('{0} - {1}'.format(self.appTitle, self.currentFileName))
-        else:
-            self.setWindowTitle(self.appTitle)
 
     def makeWidgets(self):
         """Create and setup the widgets"""
@@ -57,11 +53,11 @@ class PyncilApp(QMainWindow):
         self.setupHelpMenu()
 
         # Connections
-        self.editor.cursorPositionChanged.connect(self.updateStatusBar)
-        self.editor.textChanged.connect(self.updateStatusBar)
+        self.makeConnections()
 
         # Initial UI Updates
         self.updateStatusBar()
+        self.updateTitleBar()
 
     def setupEditor(self):
         self.font = QFont()
@@ -119,6 +115,14 @@ class PyncilApp(QMainWindow):
         self.helpMenu.addAction('&View Source', self.viewSource)
         self.menu_bar.addMenu(self.helpMenu)
 
+    def makeConnections(self):
+        # Status bar updates
+        self.editor.cursorPositionChanged.connect(self.updateStatusBar)
+        self.editor.textChanged.connect(self.updateStatusBar)
+
+        # Title bar updates
+        self.connect(self, SIGNAL('currentFileNameChanged'), self.updateTitleBar)
+
     def updateStatusBar(self):
         # Get current line no. and col.
         cursor = self.editor.textCursor()
@@ -126,13 +130,22 @@ class PyncilApp(QMainWindow):
         col = cursor.columnNumber()
         self.status_bar.showMessage('Ln {}, Col {}'.format(line, col))
 
+    def updateTitleBar(self):
+        self.setWindowTitle('{} - {} ({})'.format(
+            self.appTitle, 
+            self.currentFileName,
+            self.currentFilePath
+        ))
+
     def newFile(self):
         """Clears the text editor and sets the filename to 'Untitled'. 
         The first time the user tries to 'Save' the file, it will use the 
         'Save As' dialog."""
         self.editor.clear()
         self.currentFileName = 'Untitled'
+        self.currentFilePath = os.getcwd()
         self.firstSave = True
+        self.emit(SIGNAL('currentFileNameChanged'))
     
     def newWindow(self):
         pass
@@ -155,6 +168,10 @@ class PyncilApp(QMainWindow):
                     text = str(text)
 
                 self.editor.setPlainText(text)
+
+            self.currentFilePath = path
+            self.currentFileName = path.split('/')[-1]
+            self.emit(SIGNAL('currentFileNameChanged'))
 
     def saveFile(self):
         pass
