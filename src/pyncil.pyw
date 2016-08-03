@@ -16,7 +16,7 @@ import sys
 import configparser
 
 
-class PyncilApp(QDialog):
+class PyncilApp(QMainWindow):
     """Top-level Application for Pyncil IDE"""
     def __init__(self, parent=None):
         super(PyncilApp, self).__init__(parent)
@@ -44,25 +44,17 @@ class PyncilApp(QDialog):
         """Create and setup the widgets"""
         # Main editor
         self.setupEditor()
+        self.setCentralWidget(self.editor)
 
         # Status bar
-        self.statusBar = QStatusBar()
+        self.status_bar = self.statusBar()
 
         # Menus
-        self.menuBar = QMenuBar(self)
+        self.menu_bar = self.menuBar()
         self.setupFileMenu()
         self.setupEditMenu()
         self.setupToolsMenu()
         self.setupHelpMenu()
-    
-        self.menuBar.show()
-
-        # Main layout
-        self.main_layout = QVBoxLayout(self)
-        self.main_layout.addSpacing(15)
-        self.main_layout.addWidget(self.editor)
-        self.main_layout.addWidget(self.statusBar)
-        self.setLayout(self.main_layout)
 
         # Connections
         self.editor.cursorPositionChanged.connect(self.updateStatusBar)
@@ -99,7 +91,7 @@ class PyncilApp(QDialog):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction('&Close File', self.closeFile, 'Ctrl+W')
         self.fileMenu.addAction('Close &Window', qApp.quit, 'Ctrl+Q')
-        self.menuBar.addMenu(self.fileMenu)
+        self.menu_bar.addMenu(self.fileMenu)
 
     def setupEditMenu(self):
         self.editMenu = QMenu('&Edit')
@@ -113,26 +105,26 @@ class PyncilApp(QDialog):
         self.editMenu.addSeparator()
         self.editMenu.addAction('&Find', self.find, 'Ctrl+F')
         self.editMenu.addAction('&Replace', self.replace, 'Ctrl+H')
-        self.menuBar.addMenu(self.editMenu)
+        self.menu_bar.addMenu(self.editMenu)
 
     def setupToolsMenu(self):
         self.toolsMenu = QMenu('&Tools')
         self.toolsMenu.addAction('&Run Python', self.run, 'Ctrl+B')
         self.toolsMenu.addAction('&Fix Indentation', self.tabify, 'Ctrl+Shift+T')
-        self.menuBar.addMenu(self.toolsMenu)
+        self.menu_bar.addMenu(self.toolsMenu)
 
     def setupHelpMenu(self):
         self.helpMenu = QMenu('&Help')
         self.helpMenu.addAction('&About', self.about)
         self.helpMenu.addAction('&View Source', self.viewSource)
-        self.menuBar.addMenu(self.helpMenu)
+        self.menu_bar.addMenu(self.helpMenu)
 
     def updateStatusBar(self):
         # Get current line no. and col.
         cursor = self.editor.textCursor()
         line = cursor.blockNumber() + 1
         col = cursor.columnNumber()
-        self.statusBar.showMessage('Ln {}, Col {}'.format(line, col))
+        self.status_bar.showMessage('Ln {}, Col {}'.format(line, col))
 
     def newFile(self):
         """Clears the text editor and sets the filename to 'Untitled'. 
