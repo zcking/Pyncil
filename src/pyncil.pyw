@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 """
 File: pyncil.pyw
 Author: Zachary King
@@ -151,7 +153,7 @@ class PyncilApp(QMainWindow):
         self.emit(SIGNAL('currentFileNameChanged'))
     
     def newWindow(self):
-        pass
+        os.startfile(__file__)
 
     def openFile(self, path=None):
         if not path:
@@ -242,7 +244,7 @@ class PyncilApp(QMainWindow):
 
     def runWithPython2(self):
         pass
-        
+
         try:
             if self.currentFileName.endswith('.pyw'):
                 python_path = self.config['Python']['Python2PathW']
