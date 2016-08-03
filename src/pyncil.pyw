@@ -19,6 +19,8 @@ import configparser
 from multiprocessing import Process
 import webbrowser
 
+from ext import *
+
 
 class PyncilApp(QMainWindow):
     """Top-level Application for Pyncil IDE"""
@@ -29,6 +31,8 @@ class PyncilApp(QMainWindow):
         self.currentFileName = 'Untitled'
         self.currentFilePath = os.getcwd()
         self.firstSave = True
+
+        self.findDlg = None
 
         # Load the configuration
         self.config = configparser.ConfigParser()
@@ -104,8 +108,7 @@ class PyncilApp(QMainWindow):
         self.editMenu.addAction('&Paste', self.paste, 'Ctrl+V')
         self.editMenu.addAction('&Select All', self.selectAll, 'Ctrl+A')
         self.editMenu.addSeparator()
-        self.editMenu.addAction('&Find', self.find, 'Ctrl+F')
-        self.editMenu.addAction('&Replace', self.replace, 'Ctrl+H')
+        self.editMenu.addAction('&Find / Replace', find.Find(self).show, 'Ctrl+F')
         self.menu_bar.addMenu(self.editMenu)
 
     def setupToolsMenu(self):
@@ -238,12 +241,6 @@ class PyncilApp(QMainWindow):
     def selectAll(self):
         self.editor.selectAll()
 
-    def find(self):
-        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
-
-    def replace(self):
-        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
-
     def runWithPython2(self):
         self.makeErrorPopup(msg='This feature has not been implemented yet :(')
         return
@@ -324,7 +321,6 @@ class PyncilApp(QMainWindow):
         popup = QErrorMessage(self)
         popup.setWindowTitle(title)
         popup.showMessage(msg)
-
 
 
 if __name__ == '__main__':
