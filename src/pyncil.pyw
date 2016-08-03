@@ -46,14 +46,11 @@ class PyncilApp(QDialog):
 
         # Menus
         self.menuBar = QMenuBar(self)
-        self.fileMenu = QMenu('&File')
-        self.editMenu = QMenu('&Edit')
-        self.toolsMenu = QMenu('&Tools')
-        self.helpMenu = QMenu('&Help')
-        self.menuBar.addMenu(self.fileMenu)
-        self.menuBar.addMenu(self.editMenu)
-        self.menuBar.addMenu(self.toolsMenu)
-        self.menuBar.addMenu(self.helpMenu)
+        self.setupFileMenu()
+        self.setupEditMenu()
+        self.setupToolsMenu()
+        self.setupHelpMenu()
+    
         self.menuBar.show()
 
         # Main layout
@@ -70,12 +67,111 @@ class PyncilApp(QDialog):
         # Initial UI Updates
         self.updateStatusBar()
 
+    def setupFileMenu(self):
+        self.fileMenu = QMenu('&File')
+        self.fileMenu.addAction('&New File', self.newFile, 'Ctrl+N')
+        self.fileMenu.addAction('&New Window', self.newWindow, 'Ctrl+Shift+N')
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction('&Open File', self.openFile, 'Ctrl+O')
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction('&Save', self.saveFile, 'Ctrl+S')
+        self.fileMenu.addAction('Save &As', self.saveFileAs, 'Ctrl+Shift+S')
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction('&Preferences', self.openPreferences)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction('&Close File', self.closeFile, 'Ctrl+W')
+        self.fileMenu.addAction('Close &Window', qApp.quit, 'Ctrl+Q')
+        self.menuBar.addMenu(self.fileMenu)
+
+    def setupEditMenu(self):
+        self.editMenu = QMenu('&Edit')
+        self.editMenu.addAction('&Undo', self.undo, 'Ctrl+Z')
+        self.editMenu.addAction('&Redo', self.redo, 'Ctrl+Y')
+        self.editMenu.addSeparator()
+        self.editMenu.addAction('&Cut', self.cut, 'Ctrl+X')
+        self.editMenu.addAction('C&opy', self.copy, 'Ctrl+C')
+        self.editMenu.addAction('&Paste', self.paste, 'Ctrl+V')
+        self.editMenu.addAction('&Select All', self.selectAll, 'Ctrl+A')
+        self.editMenu.addSeparator()
+        self.editMenu.addAction('&Find', self.find, 'Ctrl+F')
+        self.editMenu.addAction('&Replace', self.replace, 'Ctrl+H')
+        self.menuBar.addMenu(self.editMenu)
+
+    def setupToolsMenu(self):
+        self.toolsMenu = QMenu('&Tools')
+        self.toolsMenu.addAction('&Run Python', self.run, 'Ctrl+B')
+        self.toolsMenu.addAction('&Fix Indentation', self.tabify, 'Ctrl+Shift+T')
+        self.menuBar.addMenu(self.toolsMenu)
+
+    def setupHelpMenu(self):
+        self.helpMenu = QMenu('&Help')
+        self.helpMenu.addAction('&About', self.about)
+        self.helpMenu.addAction('&View Source', self.viewSource)
+        self.menuBar.addMenu(self.helpMenu)
+
     def updateStatusBar(self):
         # Get current line no. and col.
         cursor = self.editor.textCursor()
         line = cursor.blockNumber() + 1
         col = cursor.columnNumber()
         self.statusBar.showMessage('Ln {}, Col {}'.format(line, col))
+
+    def newFile(self):
+        pass
+    
+    def newWindow(self):
+        pass
+
+    def openFile(self):
+        pass
+
+    def saveFile(self):
+        pass
+
+    def saveFileAs(self):
+        pass
+
+    def openPreferences(self):
+        pass
+
+    def closeFile(self):
+        pass
+
+    def undo(self):
+        pass
+
+    def redo(self):
+        pass
+
+    def cut(self):
+        pass
+
+    def copy(self):
+        pass
+
+    def paste(self):
+        pass
+
+    def selectAll(self):
+        pass
+
+    def find(self):
+        pass
+
+    def replace(self):
+        pass
+
+    def run(self):
+        pass
+
+    def tabify(self):
+        pass
+
+    def about(self):
+        pass
+
+    def viewSource(self):
+        pass
 
 
 
