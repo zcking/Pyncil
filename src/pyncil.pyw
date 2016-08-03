@@ -116,6 +116,7 @@ class PyncilApp(QMainWindow):
 
     def setupHelpMenu(self):
         self.helpMenu = QMenu('&Help')
+        self.helpMenu.addAction('&Help', self.help)
         self.helpMenu.addAction('&About', self.about)
         self.helpMenu.addAction('&View Source', self.viewSource)
         self.menu_bar.addMenu(self.helpMenu)
@@ -287,6 +288,19 @@ class PyncilApp(QMainWindow):
 
     def about(self):
         pass
+
+    def help(self):
+        with open('../HELP.md') as f:
+            popup = QDialog(self)
+            helpText = QTextBrowser()
+            helpText.setPlainText(f.read())
+            helpText.setHtml(helpText.toHtml())
+            layout = QVBoxLayout()
+            layout.addWidget(helpText)
+            popup.setLayout(layout)
+            popup.resize(500, 700)
+            popup.show()
+            popup.setWindowTitle('Help')
 
     def viewSource(self):
         pass
