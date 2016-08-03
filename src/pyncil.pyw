@@ -81,6 +81,8 @@ class PyncilApp(QMainWindow):
 
         self.editor = QTextEdit()
         self.editor.setFont(self.font)
+        
+        self.highlighter = highlighter.Highlighter(self.editor.document())
 
     def setupFileMenu(self):
         self.fileMenu = QMenu('&File')

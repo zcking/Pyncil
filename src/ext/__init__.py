@@ -1,1 +1,1 @@
-__all__ = ['find']
+__all__ = ['find', 'highlighter']
