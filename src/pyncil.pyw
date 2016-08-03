@@ -41,6 +41,9 @@ class PyncilApp(QDialog):
         # Main editor
         self.editor = QTextEdit()
 
+        # Status bar
+        self.statusBar = QStatusBar()
+
         # Menus
         self.menuBar = QMenuBar(self)
         self.fileMenu = QMenu('&File')
@@ -57,7 +60,22 @@ class PyncilApp(QDialog):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.addSpacing(15)
         self.main_layout.addWidget(self.editor)
+        self.main_layout.addWidget(self.statusBar)
         self.setLayout(self.main_layout)
+
+        # Connections
+        self.editor.cursorPositionChanged.connect(self.updateStatusBar)
+        self.editor.textChanged.connect(self.updateStatusBar)
+
+        # Initial UI Updates
+        self.updateStatusBar()
+
+    def updateStatusBar(self):
+        # Get current line no. and col.
+        cursor = self.editor.textCursor()
+        line = cursor.blockNumber() + 1
+        col = cursor.columnNumber()
+        self.statusBar.showMessage('Ln {}, Col {}'.format(line, col))
 
 
 
