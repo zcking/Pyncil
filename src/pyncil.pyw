@@ -22,15 +22,15 @@ class PyncilApp(QDialog):
         super(PyncilApp, self).__init__(parent)
 
         self.appTitle = 'Pyncil'
-        self.currentFileName = ''
+        self.currentFileName = 'Untitled'
+        self.firstSave = True
 
         # Load the configuration
         self.config = configparser.ConfigParser()
         self.config.read('config/settings.ini')
 
-        # Minimum dimensions
-        self.setMinimumWidth(500)
-        self.setMinimumHeight(400)
+        # Set sizing
+        self.resize(900, 700)
 
         # Create the widgets
         self.makeWidgets()
@@ -135,13 +135,34 @@ class PyncilApp(QDialog):
         self.statusBar.showMessage('Ln {}, Col {}'.format(line, col))
 
     def newFile(self):
-        pass
+        """Clears the text editor and sets the filename to 'Untitled'. 
+        The first time the user tries to 'Save' the file, it will use the 
+        'Save As' dialog."""
+        self.editor.clear()
+        self.currentFileName = 'Untitled'
+        self.firstSave = True
     
     def newWindow(self):
         pass
 
-    def openFile(self):
-        pass
+    def openFile(self, path=None):
+        if not path:
+            path = QFileDialog.getOpenFileName(self, 'Open File', 
+                '', 'Python Files (*.py *.pyw)')
+        
+        if path:
+            inFile = QFile(path)
+            if inFile.open(QFile.ReadOnly | QFile.Text):
+                text = inFile.readAll()
+
+                try:
+                    # Python 3
+                    text = str(text, encoding='ascii')
+                except TypeError:
+                    # Python 2
+                    text = str(text)
+
+                self.editor.setPlainText(text)
 
     def saveFile(self):
         pass
