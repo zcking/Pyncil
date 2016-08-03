@@ -66,6 +66,7 @@ class PyncilApp(QMainWindow):
             self.font.setFamily(self.config['Editor']['Font'])
             self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch'))
             self.font.setPointSize(self.config.getint('Editor', 'FontSize'))
+            self.font.setWordSpacing(self.config.getfloat('Editor', 'WordSpacing'))
         except Exception as e:
             self.font.setFamily('Courier')
             self.font.setFixedPitch(True)
@@ -106,7 +107,8 @@ class PyncilApp(QMainWindow):
 
     def setupToolsMenu(self):
         self.toolsMenu = QMenu('&Tools')
-        self.toolsMenu.addAction('&Run Python', self.run, 'Ctrl+B')
+        self.toolsMenu.addAction('&Run (Python 3)', self.runWithPython3, 'Ctrl+B')
+        self.toolsMenu.addAction('R&un (Python 2)', self.runWithPython2, 'Ctrl+Shift+B')
         self.toolsMenu.addAction('&Fix Indentation', self.tabify, 'Ctrl+Shift+T')
         self.menu_bar.addMenu(self.toolsMenu)
 
@@ -238,8 +240,45 @@ class PyncilApp(QMainWindow):
     def replace(self):
         pass
 
-    def run(self):
+    def runWithPython2(self):
         pass
+        
+        try:
+            if self.currentFileName.endswith('.pyw'):
+                python_path = self.config['Python']['Python2PathW']
+            elif self.currentFileName.endswith('.py'):
+                python_path = self.config['Python']['Python2Path']
+            else:
+                QMessageBox.warning(self, 
+                    'The current file ({}) is not a Python program'.format(self.currentFileName
+                ))
+                return
+            os.system(python_path + ' ' + self.currentFilePath)
+        except Exception as e:
+            error = QErrorMessage(self)
+            error.show()
+            error.showMessage('Could not run the current file with Python 2. '
+                'Perhaps try checking your Python 2 path in the preferences.\n' + str(e))
+
+    def runWithPython3(self):
+        pass
+
+        try:
+            if self.currentFileName.endswith('.pyw'):
+                python_path = self.config['Python']['Python3PathW']
+            elif self.currentFileName.endswith('.py'):
+                python_path = self.config['Python']['Python3Path']
+            else:
+                QMessageBox.warning(self, 
+                    'The current file ({}) is not a Python program'.format(self.currentFileName
+                ))
+                return
+            os.system(python_path + ' ' + self.currentFilePath)
+        except Exception as e:
+            error = QErrorMessage(self)
+            error.show()
+            error.showMessage('Could not run the current file with Python 3. '
+                'Perhaps try checking your Python 3 path in the preferences.\n' + str(e))
 
     def tabify(self):
         pass
