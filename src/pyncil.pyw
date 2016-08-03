@@ -14,6 +14,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import sys, os
 import configparser
+from multiprocessing import Process
 
 
 class PyncilApp(QMainWindow):
@@ -174,16 +175,44 @@ class PyncilApp(QMainWindow):
             self.emit(SIGNAL('currentFileNameChanged'))
 
     def saveFile(self):
-        pass
+        if self.firstSave:
+            self.currentFilePath = QFileDialog.getSaveFileName(self, 'Save File')
+            self.currentFileName = self.currentFilePath.split('/')[-1]
+            self.firstSave = False
+
+        with open(self.currentFilePath, 'w') as f:
+            f.write(self.editor.toPlainText())
+
+        self.emit(SIGNAL('currentFileNameChanged'))
 
     def saveFileAs(self):
-        pass
+        self.currentFilePath = QFileDialog.getSaveFileName(self, 'Save As')
+        self.currentFileName = self.currentFilePath.split('/')[-1]
+        self.firstSave = False
+
+        with open(self.currentFilePath, 'w') as f:
+            f.write(self.editor.toPlainText())
+
+        self.emit(SIGNAL('currentFileNameChanged'))
 
     def openPreferences(self):
-        pass
+        self.currentFilePath = os.path.join(os.getcwd(), 'config/settings.ini')
+        self.currentFileName = 'settings.ini'
+        self.firstSave = False
+
+        with open(self.currentFilePath, 'r') as f:
+            self.editor.clear()
+            self.editor.setText(f.read())
+
+        self.emit(SIGNAL('currentFileNameChanged'))
 
     def closeFile(self):
-        pass
+        self.currentFileName = 'Untitled'
+        self.currentFilePath = os.getcwd()
+        self.firstSave = True
+        self.editor.clear()
+
+        self.emit(SIGNAL('currentFileNameChanged'))
 
     def undo(self):
         self.editor.undo()
@@ -227,4 +256,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = PyncilApp()
     window.show()
-    app.exec_()
+    sys.exit(app.exec_())
