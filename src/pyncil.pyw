@@ -17,6 +17,7 @@ from PyQt4.QtGui import *
 import sys, os
 import configparser
 from multiprocessing import Process
+import webbrowser
 
 
 class PyncilApp(QMainWindow):
@@ -238,13 +239,14 @@ class PyncilApp(QMainWindow):
         self.editor.selectAll()
 
     def find(self):
-        pass
+        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
 
     def replace(self):
-        pass
+        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
 
     def runWithPython2(self):
-        pass
+        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
+        return
 
         try:
             if self.currentFileName.endswith('.pyw'):
@@ -264,7 +266,8 @@ class PyncilApp(QMainWindow):
                 'Perhaps try checking your Python 2 path in the preferences.\n' + str(e))
 
     def runWithPython3(self):
-        pass
+        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
+        return
 
         try:
             if self.currentFileName.endswith('.pyw'):
@@ -284,17 +287,29 @@ class PyncilApp(QMainWindow):
                 'Perhaps try checking your Python 3 path in the preferences.\n' + str(e))
 
     def tabify(self):
-        pass
+        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
 
     def about(self):
-        pass
+        with open('../ABOUT.md') as f:
+            popup = QDialog(self)
+            aboutText = QTextBrowser()
+            aboutText.setReadOnly(True)
+            aboutText.setPlainText(f.read())
+            aboutText.setHtml(aboutText.toHtml()) # doesn't work (rendering markdown)
+            layout = QVBoxLayout()
+            layout.addWidget(aboutText)
+            popup.setLayout(layout)
+            popup.resize(500, 400)
+            popup.show()
+            popup.setWindowTitle('About')
 
     def help(self):
         with open('../HELP.md') as f:
             popup = QDialog(self)
             helpText = QTextBrowser()
+            helpText.setReadOnly(True)
             helpText.setPlainText(f.read())
-            helpText.setHtml(helpText.toHtml())
+            helpText.setHtml(helpText.toHtml()) # doesn't work (rendering markdown)
             layout = QVBoxLayout()
             layout.addWidget(helpText)
             popup.setLayout(layout)
@@ -303,7 +318,12 @@ class PyncilApp(QMainWindow):
             popup.setWindowTitle('Help')
 
     def viewSource(self):
-        pass
+        webbrowser.open('https://www.github.com/zach-king/Pyncil.git')
+
+    def makeErrorPopup(self, title='Oops', msg='Something went wrong...'):
+        popup = QErrorMessage(self)
+        popup.setWindowTitle(title)
+        popup.showMessage(msg)
 
 
 
