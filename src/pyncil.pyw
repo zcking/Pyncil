@@ -304,18 +304,19 @@ class PyncilApp(QMainWindow):
         self.makeErrorPopup(msg='This feature has not been implemented yet :(')
 
     def about(self):
-        with open('../ABOUT.md') as f:
-            popup = QDialog(self)
-            aboutText = QTextBrowser()
-            aboutText.setReadOnly(True)
-            aboutText.setPlainText(f.read())
-            aboutText.setHtml(aboutText.toHtml()) # doesn't work (rendering markdown)
-            layout = QVBoxLayout()
-            layout.addWidget(aboutText)
-            popup.setLayout(layout)
-            popup.resize(500, 400)
-            popup.show()
-            popup.setWindowTitle('About')
+        webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/README.md')
+        # with open('../ABOUT.md') as f:
+        #     popup = QDialog(self)
+        #     aboutText = QTextBrowser()
+        #     aboutText.setReadOnly(True)
+        #     aboutText.setPlainText(f.read())
+        #     aboutText.setHtml(aboutText.toHtml()) # doesn't work (rendering markdown)
+        #     layout = QVBoxLayout()
+        #     layout.addWidget(aboutText)
+        #     popup.setLayout(layout)
+        #     popup.resize(500, 400)
+        #     popup.show()
+        #     popup.setWindowTitle('About')
 
     def help(self):
         webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/HELP.md')
