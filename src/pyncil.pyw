@@ -68,8 +68,11 @@ class PyncilApp(QMainWindow):
     def makeWidgets(self):
         """Create and setup the widgets"""
         self.container = Container()
+
         self.numberBar = numberbar.NumberBar()
-        self.container.container.addWidget(self.numberBar)
+
+        if self.config.getboolean('Editor', 'ShowLineNumbers'):
+            self.container.container.addWidget(self.numberBar)
 
         # Main editor
         self.setupEditor()
