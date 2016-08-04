@@ -44,12 +44,13 @@ class PyncilApp(QMainWindow):
         self.currentFileName = 'Untitled'
         self.currentFilePath = os.getcwd()
         self.firstSave = True
-
         self.findDlg = None
 
         # Load the configuration
         self.config = configparser.ConfigParser()
         self.config.read('config/settings.ini')
+
+        self.lineNumbersOn = self.config.getboolean('Editor', 'ShowLineNumbers')
 
         # Set sizing
         self.resize(900, 700)
@@ -71,7 +72,7 @@ class PyncilApp(QMainWindow):
 
         self.numberBar = numberbar.NumberBar()
 
-        if self.config.getboolean('Editor', 'ShowLineNumbers'):
+        if self.lineNumbersOn:
             self.container.container.addWidget(self.numberBar)
 
         # Main editor
