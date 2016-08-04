@@ -318,18 +318,19 @@ class PyncilApp(QMainWindow):
             popup.setWindowTitle('About')
 
     def help(self):
-        with open('../HELP.md') as f:
-            popup = QDialog(self)
-            helpText = QTextBrowser()
-            helpText.setReadOnly(True)
-            helpText.setPlainText(f.read())
-            helpText.setHtml(helpText.toHtml()) # doesn't work (rendering markdown)
-            layout = QVBoxLayout()
-            layout.addWidget(helpText)
-            popup.setLayout(layout)
-            popup.resize(500, 700)
-            popup.show()
-            popup.setWindowTitle('Help')
+        webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/HELP.md')
+        # with open('../HELP.md') as f:
+        #     popup = QDialog(self)
+        #     helpText = QTextBrowser()
+        #     helpText.setReadOnly(True)
+        #     helpText.setPlainText(f.read())
+        #     helpText.setHtml(helpText.toHtml()) # doesn't work (rendering markdown)
+        #     layout = QVBoxLayout()
+        #     layout.addWidget(helpText)
+        #     popup.setLayout(layout)
+        #     popup.resize(500, 700)
+        #     popup.show()
+        #     popup.setWindowTitle('Help')
 
     def viewSource(self):
         webbrowser.open('https://www.github.com/zach-king/Pyncil.git')
