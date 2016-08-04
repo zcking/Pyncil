@@ -3,9 +3,18 @@ from PyQt4.QtCore import Qt
 import configparser
 
 
-class Highlighter(QtGui.QSyntaxHighlighter):
+class PythonHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, parent=None):
-        super(Highlighter, self).__init__(parent)
+        super(PythonHighlighter, self).__init__(parent)
+
+        self.classRegex = QtCore.QRegExp("\\bQ[A-Za-z]+\\b")
+        self.singleLineCommentRegex = QtCore.QRegExp("#[^\n]*")
+        self.multiLineCommentRegex = None
+        self.singleQuoteRegex = QtCore.QRegExp("'.*'")
+        self.doubleQuoteRegex = QtCore.QRegExp("\".*\"")
+        self.functionRegex = QtCore.QRegExp("\\b[A-Za-z0-9_]+(?=\\()")
+        self.commentStartRegex = QtCore.QRegExp('/"""')
+        self.commentEndRegex = QtCore.QRegExp('"""/')
 
         keywordFormat = QtGui.QTextCharFormat()
         keywordFormat.setForeground(QtCore.Qt.magenta)
@@ -19,31 +28,31 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         classFormat = QtGui.QTextCharFormat()
         classFormat.setFontWeight(QtGui.QFont.Bold)
         classFormat.setForeground(QtCore.Qt.darkMagenta)
-        self.highlightingRules.append((QtCore.QRegExp("\\bQ[A-Za-z]+\\b"), 
+        self.highlightingRules.append((self.classRegex, 
             classFormat))
 
         singleLineCommentFormat = QtGui.QTextCharFormat()
         singleLineCommentFormat.setForeground(QtCore.Qt.red)
-        self.highlightingRules.append((QtCore.QRegExp("#[^\n]*"), singleLineCommentFormat))
+        self.highlightingRules.append((self.singleLineCommentRegex, singleLineCommentFormat))
 
         self.multiLineCommentFormat = QtGui.QTextCharFormat()
         self.multiLineCommentFormat.setForeground(QtCore.Qt.red)
 
         quotationFormat = QtGui.QTextCharFormat()
         quotationFormat.setForeground(QtCore.Qt.darkGreen)
-        self.highlightingRules.append((QtCore.QRegExp("\".*\""),
+        self.highlightingRules.append((self.doubleQuoteRegex,
             quotationFormat))
-        self.highlightingRules.append((QtCore.QRegExp("'.*'"),
+        self.highlightingRules.append((self.singleQuoteRegex,
             quotationFormat))
 
         functionFormat = QtGui.QTextCharFormat()
         functionFormat.setFontItalic(True)
         functionFormat.setForeground(QtCore.Qt.blue)
-        self.highlightingRules.append((QtCore.QRegExp("\\b[A-Za-z0-9_]+(?=\\()"),
+        self.highlightingRules.append((self.functionRegex,
             functionFormat))
 
-        self.commentStartExpression = QtCore.QRegExp('/"""')
-        self.commentEndExpression = QtCore.QRegExp('"""/')
+        self.commentStartExpression = self.commentStartRegex
+        self.commentEndExpression = self.commentEndRegex
 
     def highlightBlock(self, text):
         for pattern, format in self.highlightingRules:
@@ -71,14 +80,6 @@ class Highlighter(QtGui.QSyntaxHighlighter):
 
             self.setFormat(startIndex, commentLength, self.multiLineCommentFormat)
             startIndex = self.commentStartExpression.indexIn(text, startIndex + commentLength)
-
-
-    def loadConfig(self, configfilepath):
-        config = configparser.ConfigParser()
-        config.read(configfilepath)
-
-        self.foreground = config['SyntaxHighlighting']['Foreground']
-        self.background = config['SyntaxHighlighting']['background']
 
     def getPatterns(self, filepath):
         patterns = []

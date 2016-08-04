@@ -20,6 +20,7 @@ from multiprocessing import Process
 import webbrowser
 
 from ext import *
+from ext import highlighter
 
 
 class PyncilApp(QMainWindow):
@@ -68,7 +69,13 @@ class PyncilApp(QMainWindow):
         self.updateTitleBar()
 
     def setupEditor(self):
+        self.editor = QTextEdit()
+
+        self.setEditorStyle()
+
+    def setEditorStyle(self):
         self.font = QFont()
+
         try:
             self.font.setFamily(self.config['Editor']['Font'])
             self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch'))
@@ -79,10 +86,70 @@ class PyncilApp(QMainWindow):
             self.font.setFixedPitch(True)
             self.font.setPointSize(11)
 
-        self.editor = QTextEdit()
+        self.highlighter = highlighter.PythonHighlighter(self.editor.document())
+
+        self.setColors()
+
         self.editor.setFont(self.font)
+
+    def getQColor(self, colorString):
+        try:
+            # Assume the string is hexadecimal RGB
+            rVal = int(colorString[:2], 16)
+            gVal = int(colorString[2:4], 16)
+            bVal = int(colorString[4:6], 16)
+            return QColor(rVal, gVal, bVal)
+        except:
+            # Not hex string, so try a built-in QColor color
+            try:
+                return QColor(colorString)
+            except:
+                return None
+
+    def setColors(self):
+        palette = QPalette()
+
+        # Background Color
+        bgColor = self.getQColor(self.config['Colors']['Background'])
+        if bgColor:
+            palette.setColor(QPalette.Base, bgColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color <{}> for Background from settings'.format(
+                self.config['Colors']['Background']
+            ))
+
+        # Foreground Color
+        fgc = self.getQColor(self.config['Colors']['Foreground'])
+        if fgc:
+            palette.setColor(QPalette.Text, fgc)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color <{}> for Foreground from settings'.format(
+                self.config['Colors']['Foreground']
+            ))
+
+        # Single Line Comments
+        lineCommentFormat = QTextCharFormat()
+        lineCommentFormat.setForeground(self.getQColor(self.config['Colors']['SingleLineComment']))
+        self.highlighter.highlightingRules.append((QRegExp("#[^\n]*"), lineCommentFormat))
+
+        # Block Comment
+        # blockCommentFormat = QTextCharFormat()
+        # blockCommentFormat.setForeground(self.getQColor(self.config['Colors']['MultiLineComment']))
+        # self.highlighter.highlightingRules.append((self.highlighter.multiLineCommentRegex, blockCommentFormat))
+
+        # Single Quotes
+
+        # Double Quotes
+
+        # Functions
+
+        # Keywords
+
+        # Apply the color palette
+        self.setPalette(palette)
+
+        self.editor.setTabStopWidth(25)
         
-        self.highlighter = highlighter.Highlighter(self.editor.document())
 
     def setupFileMenu(self):
         self.fileMenu = QMenu('&File')
