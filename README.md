@@ -5,6 +5,8 @@ isn't meant to storm the world of developers and usher in next-gen development. 
 I designed Pyncil to work specifically for Python at its best, although you can easily 
 extend it to work for other languages as well. Oh, and Pyncil was written completely in Python!
 
+![alt](./screenshot.png)
+
 ---
 
 ## Configuring Pyncil

@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+### 
+# Copyright (2015) Zachary King
+# Pyrite
+# Version 1.0.5
+###
 
 """
 File: pyncil.pyw
