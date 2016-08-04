@@ -28,6 +28,13 @@ from ext import *
 from ext import highlighter
 
 
+class Container(QWidget):
+    def __init__(self, parent=None):
+        super(Container, self).__init__(parent)
+
+        self.container = QHBoxLayout()
+
+
 class PyncilApp(QMainWindow):
     """Top-level Application for Pyncil IDE"""
     def __init__(self, parent=None):
@@ -50,11 +57,30 @@ class PyncilApp(QMainWindow):
         # Create the widgets
         self.makeWidgets()
 
+    def eventFilter(self, object, event):
+        # Update the line numbers for all events on the text edit and the viewport.
+        # This is easier than connecting all necessary singals.
+        if object in (self.editor, self.editor.viewport()):
+            self.numberBar.update()
+            return False
+        return QFrame.eventFilter(object, event)
+
     def makeWidgets(self):
         """Create and setup the widgets"""
+        self.container = Container()
+        self.numberBar = numberbar.NumberBar()
+        self.container.container.addWidget(self.numberBar)
+
         # Main editor
         self.setupEditor()
-        self.setCentralWidget(self.editor)
+        
+        self.container.setLayout(self.container.container)
+        
+        self.numberBar.setTextEdit(self.editor)
+        self.setCentralWidget(self.container)
+
+        self.editor.installEventFilter(self)
+        self.editor.viewport().installEventFilter(self)
 
         # Status bar
         self.status_bar = self.statusBar()
@@ -75,6 +101,7 @@ class PyncilApp(QMainWindow):
 
     def setupEditor(self):
         self.editor = QTextEdit()
+        self.container.container.addWidget(self.editor)
         self.setEditorStyle()
 
     def setEditorStyle(self):
