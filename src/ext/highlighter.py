@@ -27,8 +27,7 @@ class PythonHighlighter(BaseHighlighter):
     def __init__(self, parent=None):
         super(PythonHighlighter, self).__init__(parent)
 
-        self.parent
-
+        self.parent = parent
         self.loadConfig()
 
         self.classRegex = QtCore.QRegExp("\\bQ[A-Za-z]+\\b")
@@ -42,11 +41,9 @@ class PythonHighlighter(BaseHighlighter):
 
         keywordFormat = QtGui.QTextCharFormat()
         keywordFormat.setFontWeight(QtGui.QFont.Bold)
-
-        keywordPatterns = self.getPatterns('ext/python_keywords.txt')
-
+        self.keywordPatterns = self.getPatterns('ext/python_keywords.txt')
         self.highlightingRules =[(QtCore.QRegExp(pattern), keywordFormat)
-                for pattern in keywordPatterns]
+                for pattern in self.keywordPatterns]
 
         classFormat = QtGui.QTextCharFormat()
         classFormat.setFontWeight(QtGui.QFont.Bold)
@@ -128,6 +125,15 @@ class PythonHighlighter(BaseHighlighter):
     def getPalette(self):
         palette = QtGui.QPalette()
 
+        # Keywords
+        keywordColor = self.getQColor(self.config['Colors']['Keyword'])
+        if keywordColor:
+            keywordFormat = QtGui.QTextCharFormat()
+            keywordFormat.setForeground(keywordColor)
+            self.highlightingRules += [(pattern, keywordFormat) for pattern in self.keywordPatterns]
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Keyword from settings')
+
         # Background Color
         bgColor = self.getQColor(self.config['Colors']['Background'])
         if bgColor:
@@ -179,15 +185,6 @@ class PythonHighlighter(BaseHighlighter):
             self.highlightingRules.append((self.functionRegex, functionFormat))
         else:
             self.makeErrorPopup(msg='Unable to load the color for Function from settings')
-
-        # Keywords
-        keywordColor = self.getQColor(self.config['Colors']['Keyword'])
-        if keywordColor:
-            keywordFormat = QtGui.QTextCharFormat()
-            keywordFormat.setForeground(keywordColor)
-            # self.highlightingRules.append((self.________, keywordFormat))
-        else:
-            self.makeErrorPopup(msg='Unable to load the color for Keyword from settings')
 
         selectColor = self.getQColor(self.config['Colors']['Highlight'])
         if selectColor:

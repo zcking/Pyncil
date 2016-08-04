@@ -91,8 +91,9 @@ class PyncilApp(QMainWindow):
             self.highlighter = eval(
                 'highlighter.' + self.config['Extensions']['Highlighter'] + '(self.editor.document())')
             self.editor.setPalette(self.highlighter.getPalette())
-        except:
+        except Exception as e:
             self.makeErrorPopup(msg='Unable to load the Highlighter speficied in Extensions -> Highlighter')
+            print(e)
             self.highlighter = None
 
         self.editor.setTabStopWidth(25)
@@ -259,45 +260,35 @@ class PyncilApp(QMainWindow):
         self.editor.selectAll()
 
     def runWithPython2(self):
-        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
-        return
-
         try:
-            if self.currentFileName.endswith('.pyw'):
-                python_path = self.config['Python']['Python2PathW']
-            elif self.currentFileName.endswith('.py'):
-                python_path = self.config['Python']['Python2Path']
+            python_path = self.config['Python']['Python2Path'] + 'python'
+            isGUI = self.currentFileName.endswith('.pyw')
+
+            if isGUI:
+                python_path += 'w'
+            
+            if self.currentFileName.endswith('.py') or isGUI:
+                os.system(python_path + ' -i ' + self.currentFilePath)
             else:
-                QMessageBox.warning(self, 
-                    'The current file ({}) is not a Python program'.format(self.currentFileName
-                ))
-                return
-            os.system(python_path + ' ' + self.currentFilePath)
+                self.makeErrorPopup(msg='The current file ({}) is not a Python file'.format(self.currentFileName))
         except Exception as e:
-            error = QErrorMessage(self)
-            error.show()
-            error.showMessage('Could not run the current file with Python 2. '
+            self.makeErrorPopup(msg='Could not run the current file with Python 2. '
                 'Perhaps try checking your Python 2 path in the preferences.\n' + str(e))
 
     def runWithPython3(self):
-        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
-        return
-
         try:
-            if self.currentFileName.endswith('.pyw'):
-                python_path = self.config['Python']['Python3PathW']
-            elif self.currentFileName.endswith('.py'):
-                python_path = self.config['Python']['Python3Path']
+            python_path = self.config['Python']['Python3Path'] + 'python'
+            isGUI = self.currentFileName.endswith('.pyw')
+
+            if isGUI:
+                python_path += 'w'
+            
+            if self.currentFileName.endswith('.py') or isGUI:
+                os.system(python_path + ' -i ' + self.currentFilePath)
             else:
-                QMessageBox.warning(self, 
-                    'The current file ({}) is not a Python program'.format(self.currentFileName
-                ))
-                return
-            os.system(python_path + ' ' + self.currentFilePath)
+                self.makeErrorPopup(msg='The current file ({}) is not a Python file'.format(self.currentFileName))
         except Exception as e:
-            error = QErrorMessage(self)
-            error.show()
-            error.showMessage('Could not run the current file with Python 3. '
+            self.makeErrorPopup(msg='Could not run the current file with Python 3. '
                 'Perhaps try checking your Python 3 path in the preferences.\n' + str(e))
 
     def tabify(self):
