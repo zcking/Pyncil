@@ -41,7 +41,6 @@ class PythonHighlighter(BaseHighlighter):
         self.commentEndRegex = QtCore.QRegExp('"""/')
 
         keywordFormat = QtGui.QTextCharFormat()
-        keywordFormat.setForeground(QtCore.Qt.magenta)
         keywordFormat.setFontWeight(QtGui.QFont.Bold)
 
         keywordPatterns = self.getPatterns('ext/python_keywords.txt')
@@ -51,19 +50,15 @@ class PythonHighlighter(BaseHighlighter):
 
         classFormat = QtGui.QTextCharFormat()
         classFormat.setFontWeight(QtGui.QFont.Bold)
-        classFormat.setForeground(QtCore.Qt.darkMagenta)
         self.highlightingRules.append((self.classRegex, 
             classFormat))
 
         singleLineCommentFormat = QtGui.QTextCharFormat()
-        singleLineCommentFormat.setForeground(QtCore.Qt.red)
         self.highlightingRules.append((self.singleLineCommentRegex, singleLineCommentFormat))
 
         self.multiLineCommentFormat = QtGui.QTextCharFormat()
-        self.multiLineCommentFormat.setForeground(QtCore.Qt.red)
 
         quotationFormat = QtGui.QTextCharFormat()
-        quotationFormat.setForeground(QtCore.Qt.darkGreen)
         self.highlightingRules.append((self.doubleQuoteRegex,
             quotationFormat))
         self.highlightingRules.append((self.singleQuoteRegex,
@@ -193,6 +188,18 @@ class PythonHighlighter(BaseHighlighter):
             # self.highlightingRules.append((self.________, keywordFormat))
         else:
             self.makeErrorPopup(msg='Unable to load the color for Keyword from settings')
+
+        selectColor = self.getQColor(self.config['Colors']['Highlight'])
+        if selectColor:
+            palette.setColor(QtGui.QPalette.Highlight, selectColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Highlight from settings')
+
+        selectedTextColor = self.getQColor(self.config['Colors']['HighlightedText'])
+        if selectedTextColor:
+            palette.setColor(QtGui.QPalette.HighlightedText, selectedTextColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for HighlightedText from settings')
 
         return palette
 
