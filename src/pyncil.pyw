@@ -84,6 +84,7 @@ class PyncilApp(QMainWindow):
             self.font.setFamily('Courier')
             self.font.setFixedPitch(True)
             self.font.setPointSize(11)
+            self.font.setWordSpacing(1.0)
 
         # Critical - if you are extending this editor with your own highlighter, 
         # this is the line that should be changed
@@ -96,7 +97,7 @@ class PyncilApp(QMainWindow):
             print(e)
             self.highlighter = None
 
-        self.editor.setTabStopWidth(25)
+        self.editor.setTabStopWidth(40)
         self.editor.setFont(self.font)
         
 
@@ -292,37 +293,23 @@ class PyncilApp(QMainWindow):
                 'Perhaps try checking your Python 3 path in the preferences.\n' + str(e))
 
     def tabify(self):
-        self.makeErrorPopup(msg='This feature has not been implemented yet :(')
+        try:
+            text = self.editor.toPlainText()
+            if self.config.getboolean('Editor', 'UseSpaces'):
+                text = text.replace('\t', ' ' * self.config.getint('Editor', 'SpacesPerTab'))
+            else:
+                text = text.replace(' ' * self.config.getint('Editor', 'SpacesPerTab'), '\t')
+            self.editor.clear()
+            self.editor.setText(text)
+        except Exception as e:
+            self.makeErrorPopup(msg='Unable to fix indentation')
+            print(e)
 
     def about(self):
         webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/README.md')
-        # with open('../ABOUT.md') as f:
-        #     popup = QDialog(self)
-        #     aboutText = QTextBrowser()
-        #     aboutText.setReadOnly(True)
-        #     aboutText.setPlainText(f.read())
-        #     aboutText.setHtml(aboutText.toHtml()) # doesn't work (rendering markdown)
-        #     layout = QVBoxLayout()
-        #     layout.addWidget(aboutText)
-        #     popup.setLayout(layout)
-        #     popup.resize(500, 400)
-        #     popup.show()
-        #     popup.setWindowTitle('About')
 
     def help(self):
         webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/HELP.md')
-        # with open('../HELP.md') as f:
-        #     popup = QDialog(self)
-        #     helpText = QTextBrowser()
-        #     helpText.setReadOnly(True)
-        #     helpText.setPlainText(f.read())
-        #     helpText.setHtml(helpText.toHtml()) # doesn't work (rendering markdown)
-        #     layout = QVBoxLayout()
-        #     layout.addWidget(helpText)
-        #     popup.setLayout(layout)
-        #     popup.resize(500, 700)
-        #     popup.show()
-        #     popup.setWindowTitle('Help')
 
     def viewSource(self):
         webbrowser.open('https://www.github.com/zach-king/Pyncil.git')
