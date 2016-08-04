@@ -1,13 +1,9 @@
 #!/usr/bin/python3
-### 
-# Copyright (2015) Zachary King
-# Pyrite
-# Version 1.0.5
-###
 
 """
 File: pyncil.pyw
 Author: Zachary King
+Copyright (2016)
 
 Description:
 'Pyncil' is an open-sourcce, Python text editor. It is written 
