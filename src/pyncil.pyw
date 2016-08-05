@@ -209,7 +209,7 @@ class PyncilApp(QMainWindow):
         self.emit(SIGNAL('currentFileNameChanged'))
     
     def newWindow(self):
-        os.startfile(__file__)
+        os.startfile(__file__) # Temporary solution?
 
     def openFile(self, path=None):
         if not path:
@@ -217,6 +217,7 @@ class PyncilApp(QMainWindow):
                 '', 'Python Files (*.py *.pyw)')
         
         if path:
+            self.firstSave = False
             inFile = QFile(path)
             if inFile.open(QFile.ReadOnly | QFile.Text):
                 text = inFile.readAll()
