@@ -70,6 +70,10 @@ class PythonHighlighter(BaseHighlighter):
         self.commentStartExpression = self.commentStartRegex
         self.commentEndExpression = self.commentEndRegex
 
+        # For use by the main editor
+        self.indenters = ['def', 'for', 'class', 'if', 'else', 'elif', 'switch', 'case']
+        self.dedenters = ['break', 'continue', 'return']
+
     def highlightBlock(self, text):
         for pattern, format in self.highlightingRules:
             expression = QtCore.QRegExp(pattern)

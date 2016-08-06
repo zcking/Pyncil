@@ -70,7 +70,7 @@ class PyncilApp(QMainWindow):
                 elif self.config.getboolean('Editor', 'smartindent'): # Smart indent
                     if key == Qt.Key_Return or key == Qt.Key_Enter: 
                         self.enter()
-                        # return True # uncomment this line after implementing self.enter()
+                        return True
 
             self.numberBar.update()
             return False
@@ -462,8 +462,41 @@ class PyncilApp(QMainWindow):
 
     def enter(self):
         """Smart Enter. Auto-Indents/Dedents (if enabled) appropriately"""
-        print('Smart Enter')
+        # get cursor
+        cursor = self.editor.textCursor()
 
+        # Get current line
+        line = cursor.block().text()
+
+        # Get the current level of indentation
+        if self.config.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        else:
+            indentation = '\t'
+
+        level = len(line.split(indentation)[:-1])
+
+        # Insert new line
+        cursor.insertText('\n')
+
+        # Match current level of indentation
+        for i in range(level):
+            self.indent()
+
+        # Strip indentation from line for parsing
+        line = line.lstrip()
+
+        # Should indent?
+        for indenter in self.highlighter.indenters:
+            if line.startswith(indenter):
+                self.indent()
+                return
+        
+        # Should dedent?
+        for dedenter in self.highlighter.dedenters:
+            if line.startswith(dedenter):
+                self.dedent()
+                return
 
 
 
