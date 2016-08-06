@@ -170,7 +170,10 @@ class PyncilApp(QMainWindow):
         self.toolsMenu = QMenu('&Tools')
         self.toolsMenu.addAction('&Run (Python 3)', self.runWithPython3, 'Ctrl+B')
         self.toolsMenu.addAction('R&un (Python 2)', self.runWithPython2, 'Ctrl+Shift+B')
-        self.toolsMenu.addAction('&Fix Indentation', self.tabify, 'Ctrl+Shift+T')
+        self.toolsMenu.addAction('&Unify Indentation', self.tabify, 'Ctrl+Shift+T')
+        self.toolsMenu.addSeparator()
+        self.toolsMenu.addAction('&Indent Line/Block', self.indent, 'Ctrl+Tab')
+        self.toolsMenu.addAction('&Dedent Line/Block', self.dedent, 'Ctrl+Shift+Tab')
         self.menu_bar.addMenu(self.toolsMenu)
 
     def setupHelpMenu(self):
@@ -374,6 +377,77 @@ class PyncilApp(QMainWindow):
         popup = QErrorMessage(self)
         popup.setWindowTitle(title)
         popup.showMessage(msg)
+
+    def indent(self):
+        if self.config.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        else:
+            indentation = '\t'
+        
+        # Get the cursor
+        cursor = self.editor.textCursor()
+
+        if cursor.hasSelection():
+            # Store the current line/block number
+            temp = cursor.blockNumber()
+
+            # Move to end of selection
+            cursor.setPosition(cursor.selectionEnd())
+
+            # Get the range of selection
+            diff = cursor.blockNumber() - temp
+
+            # Iterate over lines 
+            for i in range(diff + 1):
+                # Move to the beginning of the line
+                cursor.movePosition(QTextCursor.StartOfLine)
+
+                # Tab
+                cursor.insertText(indentation)
+
+                # Move back up
+                cursor.movePosition(QTextCursor.Up)
+        else: # No selection, just indent
+            cursor.movePosition(QTextCursor.StartOfLine)
+            cursor.insertText(indentation)
+
+    def dedent(self):
+        cursor = self.editor.textCursor()
+
+        if cursor.hasSelection():
+            # Store current line/block number
+            temp = cursor.blockNumber()
+
+            # Move to the selection's last line
+            cursor.setPosition(cursor.selectionEnd())
+
+            # Get range of selection
+            diff = cursor.blockNumber() - temp
+
+            # Iterate over lines
+            for i in range(diff + 1):
+                self.handleDedent(cursor)
+
+                # Move up
+                cursor.movePosition(QTextCursor.Up)
+        else:
+            self.handleDedent(cursor)
+
+    def handleDedent(self, cursor):
+        if self.config.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        else:
+            indentation = '\t'
+
+        cursor.movePosition(QTextCursor.StartOfLine)
+
+        # get the current line
+        line = cursor.block().text()
+
+        # If the line starts with an indent, delete it 
+        if line.startswith(indentation):
+            for i in range(len(indentation)):
+                cursor.deleteChar()
 
 
 
