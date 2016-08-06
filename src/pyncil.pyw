@@ -19,6 +19,7 @@ import sys, os
 import configparser
 from multiprocessing import Process
 import webbrowser
+import tempfile
 
 from ext import *
 from ext import highlighter
@@ -122,19 +123,11 @@ class PyncilApp(QMainWindow):
         self.font = QFont()
         self.loadConfig()
 
-        try:
-            self.font.setFamily(self.config['Editor']['Font'])
-            self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch'))
-            self.font.setPointSize(self.config.getint('Editor', 'FontSize'))
-            self.font.setWordSpacing(self.config.getfloat('Editor', 'WordSpacing'))
-        except Exception as e:
-            self.font.setFamily('Courier')
-            self.font.setFixedPitch(True)
-            self.font.setPointSize(11)
-            self.font.setWordSpacing(1.0)
+        self.font.setFamily(self.config.get('Editor', 'Font', fallback='Courier')
+        self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch', fallback=True))
+        self.font.setPointSize(self.config.getint('Editor', 'FontSize', fallback=11))
+        self.font.setWordSpacing(self.config.getfloat('Editor', 'WordSpacing', fallback=1.0))
 
-        # Critical - if you are extending this editor with your own highlighter, 
-        # this is the line that should be changed
         try:
             self.highlighter = eval(
                 'highlighter.' + self.config['Extensions']['Highlighter'] + '(self.editor.document())')
@@ -331,6 +324,12 @@ class PyncilApp(QMainWindow):
         self.editor.selectAll()
 
     def runWithPython2(self):
+        # Save first
+        if self.firstSave:
+            self.saveFileAs()
+        else:
+            self.saveFile()
+
         try:
             python_path = self.config['Python']['Python2Path'] + 'python'
             isGUI = self.currentFileName.endswith('.pyw')
@@ -347,6 +346,12 @@ class PyncilApp(QMainWindow):
                 'Perhaps try checking your Python 2 path in the preferences.\n' + str(e))
 
     def runWithPython3(self):
+        # Save first
+        if self.firstSave:
+            self.saveFileAs()
+        else:
+            self.saveFile()
+            
         try:
             python_path = self.config['Python']['Python3Path'] + 'python'
             isGUI = self.currentFileName.endswith('.pyw')
