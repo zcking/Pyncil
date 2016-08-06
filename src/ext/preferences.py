@@ -25,7 +25,7 @@ class PreferencesDlg(QDialog):
         self.setupExtensionsWidgets()
 
         buttonLayout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = QPushButton('&Save')
         self.cancelButton = QPushButton('Cancel')
         buttonLayout.addWidget(self.saveButton)
         buttonLayout.addWidget(self.cancelButton)
