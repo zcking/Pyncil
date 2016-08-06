@@ -59,8 +59,15 @@ class PyncilApp(QMainWindow):
 
     def eventFilter(self, object, event):
         # Update the line numbers for all events on the text edit and the viewport.
-        # This is easier than connecting all necessary singals.
+        # This is easier than connecting all necessary signals.
         if object in (self.editor, self.editor.viewport()):
+            # For the indentation
+            if event.type() == QEvent.KeyPress:
+                if (QKeyEvent)(event).key() == Qt.Key_Tab:
+                    self.indent()
+                    return True
+                # elif (QKeySequence)(event) == QKeySequence.keyBindings()
+
             self.numberBar.update()
             return False
         return QFrame.eventFilter(object, event)
@@ -164,6 +171,9 @@ class PyncilApp(QMainWindow):
         self.editMenu.addAction('&Select All', self.selectAll, 'Ctrl+A')
         self.editMenu.addSeparator()
         self.editMenu.addAction('&Find / Replace', find.Find(self).show, 'Ctrl+F')
+        self.editMenu.addSeparator()
+        self.editMenu.addAction('&Indent Line/Block', self.indent, 'Tab')
+        self.editMenu.addAction('&Dedent Line/Block', self.dedent, 'Shift+Tab')
         self.menu_bar.addMenu(self.editMenu)
 
     def setupToolsMenu(self):
@@ -171,9 +181,6 @@ class PyncilApp(QMainWindow):
         self.toolsMenu.addAction('&Run (Python 3)', self.runWithPython3, 'Ctrl+B')
         self.toolsMenu.addAction('R&un (Python 2)', self.runWithPython2, 'Ctrl+Shift+B')
         self.toolsMenu.addAction('&Unify Indentation', self.tabify, 'Ctrl+Shift+T')
-        self.toolsMenu.addSeparator()
-        self.toolsMenu.addAction('&Indent Line/Block', self.indent, 'Ctrl+Tab')
-        self.toolsMenu.addAction('&Dedent Line/Block', self.dedent, 'Ctrl+Shift+Tab')
         self.menu_bar.addMenu(self.toolsMenu)
 
     def setupHelpMenu(self):
