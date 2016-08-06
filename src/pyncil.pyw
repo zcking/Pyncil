@@ -257,6 +257,10 @@ class PyncilApp(QMainWindow):
         self.emit(SIGNAL('currentFileNameChanged'))
 
     def openPreferences(self):
+        # Create the Preferences dialog
+        dlg = preferences.PreferencesDlg(self)
+        dlg.show()
+        return
         self.currentFilePath = os.path.join(os.getcwd(), 'config/settings.ini')
         self.currentFileName = 'settings.ini'
         self.firstSave = False
@@ -351,6 +355,8 @@ class PyncilApp(QMainWindow):
         popup = QErrorMessage(self)
         popup.setWindowTitle(title)
         popup.showMessage(msg)
+
+
 
 
 if __name__ == '__main__':

@@ -1,1 +1,1 @@
-__all__ = ['find', 'highlighter', 'numberbar']
+__all__ = ['find', 'highlighter', 'numberbar', 'preferences']
