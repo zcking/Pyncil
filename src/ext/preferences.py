@@ -188,6 +188,33 @@ class PreferencesDlg(QDialog):
 
         self.highlighter.setText(self.config['Extensions']['Highlighter'])
 
+    def getValues(self):
+        """Reads the values from the preference widgets and 
+        stores them in the self.config ConfigParser object."""
+        self.config.set('Editor', 'Font', self.fontBox.text())
+        self.config.set('Editor', 'FontSize', str(self.fontSize.value()))
+        temp = 'yes' if self.fixedPitchToggle.isChecked() else 'no'
+        self.config.set('Editor', 'FixedPitch', temp)
+        self.config.set('Editor', 'WordSpacing', str(self.wordSpacing.value()))
+        temp = 'yes' if self.useSpaces.isChecked() else 'no'
+        self.config.set('Editor', 'UseSpaces', temp)
+        self.config.set('Editor', 'SpacesPerTab', str(self.spacesPerTab.value()))
+        temp = 'yes' if self.showLineNumbers.isChecked() else 'no'
+        self.config.set('Editor', 'ShowLineNumbers', temp)
+
+        self.config.set('Python', 'Python2Path', self.py2path.text())
+        self.config.set('Python', 'Python3Path', self.py3path.text())
+
+        self.config.set('Colors', 'Background', self.bgInput.text())
+        self.config.set('Colors', 'Foreground', self.fgInput.text())
+        self.config.set('Colors', 'SingleLineComment', self.singleInput.text())
+        self.config.set('Colors', 'MultiLineComment', self.multiInput.text())
+        self.config.set('Colors', 'String', self.stringInput.text())
+        self.config.set('Colors', 'Keyword', self.keywordInput.text())
+        self.config.set('Colors', 'Function', self.functionInput.text())
+        self.config.set('Colors', 'Highlight', self.highlightInput.text())
+        self.config.set('Colors', 'HighlightedText', self.highlightedTextInput.text())
+
     def selectBg(self):
         pass
 
@@ -216,7 +243,15 @@ class PreferencesDlg(QDialog):
         pass
 
     def save(self):
-        pass
+        # Get values into self.config
+        self.getValues()
+
+        # save the config to file
+        with open('config/settings.ini', 'w') as f:
+            self.config.write(f)
+
+        # close the dialog
+        self.destroy()
     
     def cancel(self):
-        pass
+        self.destroy()
