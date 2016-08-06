@@ -10,20 +10,21 @@ class Find(QtGui.QDialog):
         
         self.lastMatch = None
         self.initUI()
+        self.findField.setFocus()
 
     def initUI(self):
         # Search button
-        findButton = QtGui.QPushButton('Find', self)
+        findButton = QtGui.QPushButton('&Find', self)
         findButton.clicked.connect(self.find)
         self.connect(findButton, QtCore.SIGNAL('returnPressed()'), self.find)
 
         # Replace Button
-        replaceButton = QtGui.QPushButton('Replace', self)
+        replaceButton = QtGui.QPushButton('&Replace', self)
         replaceButton.clicked.connect(self.replace)
         self.connect(replaceButton, QtCore.SIGNAL('returnPressed()'), self.replace)
 
         # Replace All Button
-        replaceAllButton = QtGui.QPushButton('Replace All', self)
+        replaceAllButton = QtGui.QPushButton('Replace &All', self)
         replaceAllButton.clicked.connect(self.replaceAll)
 
         # Normal Mode
@@ -39,6 +40,7 @@ class Find(QtGui.QDialog):
 
         # Replace input
         self.replaceField = QtGui.QLineEdit(self)
+        self.connect(self.replaceField, QtCore.SIGNAL('returnPressed()'), self.replace)
 
         optionsLabel = QtGui.QLabel('Options: ', self)
 
