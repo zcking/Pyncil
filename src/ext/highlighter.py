@@ -6,9 +6,9 @@ import configparser
 # Simple add the class to this file and have it subclass from BaseHighlighter.
 # You can use the PythonHighlighter for reference.
 # Keep in mind that the QtWidget acting as the parent of the highlighter will always
-# be the QTextEdit in the PyncilApp, stored in the instance variable 'editor'
+# be the QTextEdit in the PyncilApp, stored in the instance variable 'editor.edit'
 # so if you keep a reference to the parent (the QTextEdit) as self.parent, you can reference it with 
-# self.parent.editor.
+# self.parent.editor.edit.
 
 # After creating your own highlighter class, simply change the configuration for Extensions -> Highlighter 
 # to the name of your class.
@@ -118,7 +118,7 @@ class PythonHighlighter(BaseHighlighter):
         except:
             # Not hex string, so try a built-in QColor color
             try:
-                return QtGui.QColor(colorString)
+                return QtGui.QColor('#' + colorString)
             except:
                 return None
 

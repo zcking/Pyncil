@@ -217,32 +217,53 @@ class PreferencesDlg(QDialog):
         self.config.set('Colors', 'Highlight', self.highlightInput.text())
         self.config.set('Colors', 'HighlightedText', self.highlightedTextInput.text())
 
+    def makeColorDlg(self, lineedit):
+        colorDlg = QColorDialog(self)
+        colorDlg.setCurrentColor(QColor('#' + lineedit.text()))
+        colorDlg.show()
+
+        def update():
+            color = colorDlg.currentColor()
+            rVal, gVal, bVal, aVal = color.getRgb()
+            colorString = ''
+            if rVal < 0x0F:
+                colorString += '0'
+            colorString += '%x' % rVal
+            if gVal < 0x0F:
+                colorString += '0'
+            colorString += '%x' % gVal
+            if bVal < 0x0F:
+                colorString += '0'
+            colorString += '%x' % bVal
+            lineedit.setText(colorString)
+        colorDlg.accepted.connect(update)
+
     def selectBg(self):
-        pass
+        self.makeColorDlg(self.bgInput)
 
     def selectFg(self):
-        pass
+        self.makeColorDlg(self.fgInput)
 
     def selectSingle(self):
-        pass
+        self.makeColorDlg(self.singleInput)
 
     def selectMulti(self):
-        pass
+        self.makeColorDlg(self.multiInput)
 
     def selectString(self):
-        pass
+        self.makeColorDlg(self.stringInput)
 
     def selectKeyword(self):
-        pass
+        self.makeColorDlg(self.keywordInput)
 
     def selectFunction(self):
-        pass
+        self.makeColorDlg(self.functionInput)
 
     def selectHighlight(self):
-        pass
+        self.makeColorDlg(self.highlightInput)
 
     def selectHighlightedText(self):
-        pass
+        self.makeColorDlg(self.highlightedTextInput)
 
     def save(self):
         # Get values into self.config
