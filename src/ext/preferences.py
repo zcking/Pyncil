@@ -11,6 +11,7 @@ class PreferencesDlg(QDialog):
 
         self.makeWidgets()
         self.setInitialValues()
+        self.makeConnections()
         self.setWindowTitle('Preferences')
 
     def makeWidgets(self):
@@ -29,6 +30,22 @@ class PreferencesDlg(QDialog):
         self.mainLayout.addLayout(buttonLayout)
         
         self.setLayout(self.mainLayout)
+
+    def makeConnections(self):
+        # Color Picker buttons
+        self.bgButton.clicked.connect(self.selectBg)
+        self.fgButton.clicked.connect(self.selectFg)
+        self.singleButton.clicked.connect(self.selectSingle)
+        self.multiButton.clicked.connect(self.selectMulti)
+        self.stringButton.clicked.connect(self.selectString)
+        self.keywordButton.clicked.connect(self.selectKeyword)
+        self.functionButton.clicked.connect(self.selectFunction)
+        self.highlightButton.clicked.connect(self.selectHighlight)
+        self.highlightedTextButton.clicked.connect(self.selectHighlightedText)
+
+        # Accept/Cancel buttons
+        self.saveButton.clicked.connect(self.save)
+        self.cancelButton.clicked.connect(self.cancel)
 
     def setupEditorWidgets(self):
         # Editor widgets
@@ -170,3 +187,36 @@ class PreferencesDlg(QDialog):
         self.highlightedTextInput.setText(self.config['Colors']['HighlightedText'])
 
         self.highlighter.setText(self.config['Extensions']['Highlighter'])
+
+    def selectBg(self):
+        pass
+
+    def selectFg(self):
+        pass
+
+    def selectSingle(self):
+        pass
+
+    def selectMulti(self):
+        pass
+
+    def selectString(self):
+        pass
+
+    def selectKeyword(self):
+        pass
+
+    def selectFunction(self):
+        pass
+
+    def selectHighlight(self):
+        pass
+
+    def selectHighlightedText(self):
+        pass
+
+    def save(self):
+        pass
+    
+    def cancel(self):
+        pass
