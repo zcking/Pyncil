@@ -41,6 +41,8 @@ class PythonHighlighter(BaseHighlighter):
         self.commentStartRegex = QtCore.QRegExp('/"""')
         self.commentEndRegex = QtCore.QRegExp('"""/')
 
+        self.commentChar = '#'
+
         keywordFormat = QtGui.QTextCharFormat()
         keywordFormat.setFontWeight(QtGui.QFont.Bold)
         self.keywordPatterns = self.getPatterns('ext/python_keywords.txt')

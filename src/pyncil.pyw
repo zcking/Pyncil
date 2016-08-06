@@ -171,6 +171,8 @@ class PyncilApp(QMainWindow):
         self.editMenu.addSeparator()
         self.editMenu.addAction('&Indent Line/Block', self.indent, 'Tab')
         self.editMenu.addAction('&Dedent Line/Block', self.dedent, 'Shift+Tab')
+        self.editMenu.addSeparator()
+        self.editMenu.addAction('Toggle Co&mment', self.comment, 'Ctrl+/')
         self.menu_bar.addMenu(self.editMenu)
 
     def setupToolsMenu(self):
@@ -335,6 +337,45 @@ class PyncilApp(QMainWindow):
         cursor.setPosition(QTextCursor.Start)
         # cursor.selec/
         self.editor.selectAll()
+
+    def comment(self):     
+        # Get the cursor
+        cursor = self.editor.textCursor()
+
+        if cursor.hasSelection():
+            # Store the current line/block number
+            temp = cursor.blockNumber()
+
+            # Move to end of selection
+            cursor.setPosition(cursor.selectionEnd())
+
+            # Get the range of selection
+            diff = cursor.blockNumber() - temp
+
+            # Iterate over lines 
+            for i in range(diff + 1):
+                # Move to the beginning of the line
+                cursor.movePosition(QTextCursor.StartOfLine)
+
+                # Is commented?
+                if cursor.block().text().startswith(self.highlighter.commentChar):
+                    # Remove comment char
+                    cursor.deleteChar()
+                else:
+                    # Add comment char
+                    cursor.insertText(self.highlighter.commentChar)
+
+                # Move back up
+                cursor.movePosition(QTextCursor.Up)
+        else: # No selection, just toggle comment
+            cursor.movePosition(QTextCursor.StartOfLine)
+
+            if cursor.block().text().startswith(self.highlighter.commentChar):
+                # Remove comment char
+                cursor.deleteChar()
+            else:
+                # Add comment char
+                cursor.insertText(self.highlighter.commentChar)
 
     def runWithPython2(self):
         # Save first
