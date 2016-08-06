@@ -72,6 +72,9 @@ class PyncilApp(QMainWindow):
                     if key == Qt.Key_Return or key == Qt.Key_Enter: 
                         self.enter()
                         return True
+                    elif key == Qt.Key_Backspace:
+                        self.backspace()
+                        # return True # uncomment this line after implementing self.backspace() (smart backspace)
 
             self.numberBar.update()
             return False
@@ -560,6 +563,24 @@ class PyncilApp(QMainWindow):
             if line.startswith(dedenter):
                 self.dedent()
                 return
+
+    def backspace(self):
+        """Smart backspace function to compliment the smart enter"""
+        return
+        if self.config.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        else:
+            indentation = '\t'
+
+        # get the cursor
+        cursor = self.editor.textCursor()
+
+        # Get current line
+        line = cursor.block().text()
+
+        # Check if need to deploy smart backspace action
+        col = cursor.columnNumber()
+        # if col != 0 and line[col - 1] 
 
 
 
