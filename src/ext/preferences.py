@@ -14,6 +14,8 @@ class PreferencesDlg(QDialog):
         self.makeConnections()
         self.setWindowTitle('Preferences')
 
+        self.connect(self, SIGNAL('returnPressed()'), self.save)
+
     def makeWidgets(self):
         self.mainLayout = QVBoxLayout()
 
@@ -250,8 +252,13 @@ class PreferencesDlg(QDialog):
         with open('config/settings.ini', 'w') as f:
             self.config.write(f)
 
+        self.emit(SIGNAL('preferencesUpdated'))
+
+        self.accept()
+
         # close the dialog
         self.destroy()
     
     def cancel(self):
+        self.reject()
         self.destroy()

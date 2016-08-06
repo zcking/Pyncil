@@ -43,8 +43,7 @@ class PyncilApp(QMainWindow):
         self.findDlg = None
 
         # Load the configuration
-        self.config = configparser.ConfigParser()
-        self.config.read('config/settings.ini')
+        self.loadConfig()
 
         self.lineNumbersOn = self.config.getboolean('Editor', 'ShowLineNumbers')
 
@@ -53,6 +52,10 @@ class PyncilApp(QMainWindow):
 
         # Create the widgets
         self.makeWidgets()
+
+    def loadConfig(self):
+        self.config = configparser.ConfigParser()
+        self.config.read('config/settings.ini')
 
     def eventFilter(self, object, event):
         # Update the line numbers for all events on the text edit and the viewport.
@@ -106,6 +109,7 @@ class PyncilApp(QMainWindow):
 
     def setEditorStyle(self):
         self.font = QFont()
+        self.loadConfig()
 
         try:
             self.font.setFamily(self.config['Editor']['Font'])
@@ -198,6 +202,19 @@ class PyncilApp(QMainWindow):
             self.currentFilePath
         ))
 
+    def updateUi(self):
+        # Reload the config
+        self.loadConfig()
+
+        # Update status bar and title bar
+        self.updateStatusBar()
+        self.updateTitleBar()
+
+        # Update text editor style
+        self.setEditorStyle()
+        self.editor.update()
+        self.update()
+
     def newFile(self):
         """Clears the text editor and sets the filename to 'Untitled'. 
         The first time the user tries to 'Save' the file, it will use the 
@@ -257,19 +274,21 @@ class PyncilApp(QMainWindow):
         self.emit(SIGNAL('currentFileNameChanged'))
 
     def openPreferences(self):
-        # Create the Preferences dialog
-        dlg = preferences.PreferencesDlg(self)
-        dlg.show()
-        return
-        self.currentFilePath = os.path.join(os.getcwd(), 'config/settings.ini')
-        self.currentFileName = 'settings.ini'
-        self.firstSave = False
+        try:
+            # Create the Preferences dialog
+            dlg = preferences.PreferencesDlg(self)
+            dlg.show()
+            dlg.accepted.connect(self.updateUi)
+        except Exception as e: # If failed to open Preferences dialog, just open the settings file
+            self.currentFilePath = os.path.join(os.getcwd(), 'config/settings.ini')
+            self.currentFileName = 'settings.ini'
+            self.firstSave = False
 
-        with open(self.currentFilePath, 'r') as f:
-            self.editor.clear()
-            self.editor.setText(f.read())
+            with open(self.currentFilePath, 'r') as f:
+                self.editor.clear()
+                self.editor.setText(f.read())
 
-        self.emit(SIGNAL('currentFileNameChanged'))
+            self.emit(SIGNAL('currentFileNameChanged'))
 
     def closeFile(self):
         self.currentFileName = 'Untitled'
