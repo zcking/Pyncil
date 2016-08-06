@@ -18,6 +18,8 @@ class BaseHighlighter(QtGui.QSyntaxHighlighter):
         super(BaseHighlighter, self).__init__(parent)
 
         self.parent = parent
+        self.indenters = []
+        self.dedenters = []
 
         def getPalette(self):
             raise NotImplementedError('You must subclass BaseHighlighter and implement this function. It should return a QtGui.QPalette.')
@@ -71,7 +73,7 @@ class PythonHighlighter(BaseHighlighter):
         self.commentEndExpression = self.commentEndRegex
 
         # For use by the main editor
-        self.indenters = ['def', 'for', 'class', 'if', 'else', 'elif', 'switch', 'case']
+        self.indenters = ['def', 'for', 'class', 'if', 'else', 'elif', 'switch', 'case', 'try', 'except', 'finally']
         self.dedenters = ['break', 'continue', 'return']
 
     def highlightBlock(self, text):

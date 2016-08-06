@@ -123,7 +123,7 @@ class PyncilApp(QMainWindow):
         self.font = QFont()
         self.loadConfig()
 
-        self.font.setFamily(self.config.get('Editor', 'Font', fallback='Courier')
+        self.font.setFamily(self.config.get('Editor', 'Font', fallback='Courier'))
         self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch', fallback=True))
         self.font.setPointSize(self.config.getint('Editor', 'FontSize', fallback=11))
         self.font.setWordSpacing(self.config.getfloat('Editor', 'WordSpacing', fallback=1.0))
@@ -261,7 +261,11 @@ class PyncilApp(QMainWindow):
 
     def saveFile(self):
         if self.firstSave:
-            self.currentFilePath = QFileDialog.getSaveFileName(self, 'Save File')
+            fpath = QFileDialog.getSaveFileName(self, 'Save File')
+            if fpath == '':
+                return False
+            
+            self.currentFilePath = fpath
             self.currentFileName = self.currentFilePath.split('/')[-1]
             self.firstSave = False
 
@@ -269,9 +273,14 @@ class PyncilApp(QMainWindow):
             f.write(self.editor.toPlainText())
 
         self.emit(SIGNAL('currentFileNameChanged'))
+        return True
 
     def saveFileAs(self):
-        self.currentFilePath = QFileDialog.getSaveFileName(self, 'Save As')
+        fpath = QFileDialog.getSaveFileName(self, 'Save As')
+        if fpath == '':
+            return False
+        
+        self.currentFilePath = fpath
         self.currentFileName = self.currentFilePath.split('/')[-1]
         self.firstSave = False
 
@@ -279,6 +288,7 @@ class PyncilApp(QMainWindow):
             f.write(self.editor.toPlainText())
 
         self.emit(SIGNAL('currentFileNameChanged'))
+        return True
 
     def openPreferences(self):
         try:
@@ -321,14 +331,19 @@ class PyncilApp(QMainWindow):
         self.editor.paste()
 
     def selectAll(self):
+        cursor = self.editor.textCursor()
+        cursor.setPosition(QTextCursor.Start)
+        # cursor.selec/
         self.editor.selectAll()
 
     def runWithPython2(self):
         # Save first
         if self.firstSave:
-            self.saveFileAs()
+            if not self.saveFileAs():
+                return
         else:
-            self.saveFile()
+            if not self.saveFile():
+                return
 
         try:
             python_path = self.config['Python']['Python2Path'] + 'python'
@@ -348,9 +363,11 @@ class PyncilApp(QMainWindow):
     def runWithPython3(self):
         # Save first
         if self.firstSave:
-            self.saveFileAs()
+            if not self.saveFileAs():
+                return
         else:
-            self.saveFile()
+            if not self.saveFile():
+                return
             
         try:
             python_path = self.config['Python']['Python3Path'] + 'python'
