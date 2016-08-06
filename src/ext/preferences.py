@@ -61,6 +61,7 @@ class PreferencesDlg(QDialog):
         self.spacesPerTab = QSpinBox()
         self.spacesPerTab.setRange(1, 8)
         self.showLineNumbers = QCheckBox('Show Line Numbers')
+        self.smartIndent = QCheckBox('Smart Indent')
 
         # Editor Group
         self.editorLayout = QGridLayout()
@@ -75,6 +76,7 @@ class PreferencesDlg(QDialog):
         self.editorLayout.addWidget(QLabel('Spaces Per Tab:'), 5, 0)
         self.editorLayout.addWidget(self.spacesPerTab, 5, 1)
         self.editorLayout.addWidget(self.showLineNumbers, 6, 0)
+        self.editorLayout.addWidget(self.smartIndent, 7, 0)
 
         self.editorGroupBox = QGroupBox('Editor')
         self.editorGroupBox.setLayout(self.editorLayout)
@@ -174,6 +176,7 @@ class PreferencesDlg(QDialog):
         self.useSpaces.setChecked(self.config.getboolean('Editor', 'UseSpaces'))
         self.spacesPerTab.setValue(self.config.getint('Editor', 'SpacesPerTab'))
         self.showLineNumbers.setChecked(self.config.getboolean('Editor', 'ShowLineNumbers'))
+        self.smartIndent.setChecked(self.config.getboolean('Editor', 'smartindent'))
 
         self.py2path.setText(self.config['Python']['Python2Path'])
         self.py3path.setText(self.config['Python']['Python3Path'])
@@ -203,6 +206,8 @@ class PreferencesDlg(QDialog):
         self.config.set('Editor', 'SpacesPerTab', str(self.spacesPerTab.value()))
         temp = 'yes' if self.showLineNumbers.isChecked() else 'no'
         self.config.set('Editor', 'ShowLineNumbers', temp)
+        temp = 'yes' if self.smartIndent.isChecked() else 'no'
+        self.config.set('Editor', 'smartindent', temp)
 
         self.config.set('Python', 'Python2Path', self.py2path.text())
         self.config.set('Python', 'Python3Path', self.py3path.text())

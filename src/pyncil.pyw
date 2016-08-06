@@ -63,10 +63,14 @@ class PyncilApp(QMainWindow):
         if object in (self.editor, self.editor.viewport()):
             # For the indentation
             if event.type() == QEvent.KeyPress:
-                if (QKeyEvent)(event).key() == Qt.Key_Tab:
+                key = (QKeyEvent)(event).key()
+                if key == Qt.Key_Tab:
                     self.indent()
                     return True
-                # elif (QKeySequence)(event) == QKeySequence.keyBindings()
+                elif self.config.getboolean('Editor', 'smartindent'): # Smart indent
+                    if key == Qt.Key_Return or key == Qt.Key_Enter: 
+                        self.enter()
+                        # return True # uncomment this line after implementing self.enter()
 
             self.numberBar.update()
             return False
@@ -455,6 +459,10 @@ class PyncilApp(QMainWindow):
         if line.startswith(indentation):
             for i in range(len(indentation)):
                 cursor.deleteChar()
+
+    def enter(self):
+        """Smart Enter. Auto-Indents/Dedents (if enabled) appropriately"""
+        print('Smart Enter')
 
 
 
