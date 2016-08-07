@@ -113,8 +113,15 @@ class PythonHighlighter(BaseHighlighter):
         return patterns
 
     def loadConfig(self):
-        self.config = configparser.ConfigParser()
-        self.config.read('config/settings.ini')
+        self.settings = configparser.ConfigParser()
+        self.settings.read('config/settings.ini')
+        self.theme = configparser.ConfigParser() # The theme config
+        try:
+            self.theme.read(self.settings['Editor']['theme'])
+        except Exception as e:
+            self.theme.read('config/themes/default.ini')
+            self.makeErrorPopup(msg='Unable to load theme at path specified in settings.ini. Reverting to default theme.')
+
 
     def getQColor(self, colorString):
         try:
@@ -134,7 +141,7 @@ class PythonHighlighter(BaseHighlighter):
         palette = QtGui.QPalette()
 
         # Keywords
-        keywordColor = self.getQColor(self.config['Colors']['Keyword'])
+        keywordColor = self.getQColor(self.theme['Colors']['Keyword'])
         if keywordColor:
             keywordFormat = QtGui.QTextCharFormat()
             keywordFormat.setForeground(keywordColor)
@@ -143,21 +150,21 @@ class PythonHighlighter(BaseHighlighter):
             self.makeErrorPopup(msg='Unable to load the color for Keyword from settings')
 
         # Background Color
-        bgColor = self.getQColor(self.config['Colors']['Background'])
+        bgColor = self.getQColor(self.theme['Colors']['Background'])
         if bgColor:
             palette.setColor(QtGui.QPalette.Base, bgColor)
         else:
             self.makeErrorPopup(msg='Unable to load the color for Background from settings')
 
         # Foreground Color
-        fgc = self.getQColor(self.config['Colors']['Foreground'])
+        fgc = self.getQColor(self.theme['Colors']['Foreground'])
         if fgc:
             palette.setColor(QtGui.QPalette.Text, fgc)
         else:
             self.makeErrorPopup(msg='Unable to load the color for Foreground from settings')
 
         # Single Line Comments
-        lineCommentColor = self.getQColor(self.config['Colors']['SingleLineComment'])
+        lineCommentColor = self.getQColor(self.theme['Colors']['SingleLineComment'])
         if lineCommentColor:
             lineCommentFormat = QtGui.QTextCharFormat()
             lineCommentFormat.setForeground(lineCommentColor)
@@ -167,11 +174,11 @@ class PythonHighlighter(BaseHighlighter):
 
         # Block Comment
         # blockCommentFormat = QtGui.QTextCharFormat()
-        # blockCommentFormat.setForeground(self.getQColor(self.config['Colors']['MultiLineComment']))
+        # blockCommentFormat.setForeground(self.getQColor(self.theme['Colors']['MultiLineComment']))
         # self.highlightingRules.append((self.multiLineCommentRegex, blockCommentFormat))
 
         # Single Quotes
-        singleQuoteColor = self.getQColor(self.config['Colors']['String'])
+        singleQuoteColor = self.getQColor(self.theme['Colors']['String'])
         if singleQuoteColor:
             singleQuoteFormat = QtGui.QTextCharFormat()
             singleQuoteFormat.setForeground(singleQuoteColor)
@@ -186,7 +193,7 @@ class PythonHighlighter(BaseHighlighter):
             self.highlightingRules.append((self.doubleQuoteRegex, singleQuoteFormat))
 
         # Functions
-        functionColor = self.getQColor(self.config['Colors']['Function'])
+        functionColor = self.getQColor(self.theme['Colors']['Function'])
         if functionColor:
             functionFormat = QtGui.QTextCharFormat()
             functionFormat.setForeground(functionColor)
@@ -194,13 +201,13 @@ class PythonHighlighter(BaseHighlighter):
         else:
             self.makeErrorPopup(msg='Unable to load the color for Function from settings')
 
-        selectColor = self.getQColor(self.config['Colors']['Highlight'])
+        selectColor = self.getQColor(self.theme['Colors']['Highlight'])
         if selectColor:
             palette.setColor(QtGui.QPalette.Highlight, selectColor)
         else:
             self.makeErrorPopup(msg='Unable to load the color for Highlight from settings')
 
-        selectedTextColor = self.getQColor(self.config['Colors']['HighlightedText'])
+        selectedTextColor = self.getQColor(self.theme['Colors']['HighlightedText'])
         if selectedTextColor:
             palette.setColor(QtGui.QPalette.HighlightedText, selectedTextColor)
         else:

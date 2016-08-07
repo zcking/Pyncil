@@ -47,7 +47,7 @@ class PyncilApp(QMainWindow):
         # Load the configuration
         self.loadConfig()
 
-        self.lineNumbersOn = self.config.getboolean('Editor', 'ShowLineNumbers')
+        self.lineNumbersOn = self.settings.getboolean('Editor', 'ShowLineNumbers')
 
         # Set sizing
         self.resize(900, 700)
@@ -59,8 +59,10 @@ class PyncilApp(QMainWindow):
         self.setWindowIcon(QIcon('logo.png'))
 
     def loadConfig(self):
+        self.settings = configparser.ConfigParser()
+        self.settings.read('config/settings.ini')
         self.config = configparser.ConfigParser()
-        self.config.read('config/settings.ini')
+        self.config.read(self.settings['Editor']['theme'])
 
     def eventFilter(self, object, event):
         # Update the line numbers for all events on the text edit and the viewport.
@@ -72,7 +74,7 @@ class PyncilApp(QMainWindow):
                 if key == Qt.Key_Tab:
                     self.indent()
                     return True
-                elif self.config.getboolean('Editor', 'smartindent'): # Smart indent
+                elif self.settings.getboolean('Editor', 'smartindent'): # Smart indent
                     if key == Qt.Key_Return or key == Qt.Key_Enter: 
                         self.enter()
                         return True
@@ -131,19 +133,19 @@ class PyncilApp(QMainWindow):
         self.font = QFont()
         self.loadConfig()
 
-        self.font.setFamily(self.config.get('Editor', 'Font', fallback='Courier'))
-        self.font.setFixedPitch(self.config.getboolean('Editor', 'FixedPitch', fallback=True))
-        self.font.setPointSize(self.config.getint('Editor', 'FontSize', fallback=11))
-        self.font.setWordSpacing(self.config.getfloat('Editor', 'WordSpacing', fallback=1.0))
+        self.font.setFamily(self.settings.get('Editor', 'Font', fallback='Courier'))
+        self.font.setFixedPitch(self.settings.getboolean('Editor', 'FixedPitch', fallback=True))
+        self.font.setPointSize(self.settings.getint('Editor', 'FontSize', fallback=11))
+        self.font.setWordSpacing(self.settings.getfloat('Editor', 'WordSpacing', fallback=1.0))
 
-        try:
-            self.highlighter = eval(
-                'highlighter.' + self.config['Extensions']['Highlighter'] + '(self.editor.document())')
-            self.editor.setPalette(self.highlighter.getPalette())
-        except Exception as e:
-            self.makeErrorPopup(msg='Unable to load the Highlighter speficied in Extensions -> Highlighter')
-            print(e)
-            self.highlighter = None
+        # try:
+        self.highlighter = eval(
+            'highlighter.' + self.settings['Extensions']['Highlighter'] + '(self.editor.document())')
+        self.editor.setPalette(self.highlighter.getPalette())
+        # except Exception as e:
+        #     self.makeErrorPopup(msg='Unable to load the Highlighter speficied in Extensions -> Highlighter')
+        #     print(e)
+        #     self.highlighter = highlighter.PythonHighlighter(self.editor.document())
 
         self.editor.setTabStopWidth(40)
         self.editor.setFont(self.font)
@@ -198,7 +200,6 @@ class PyncilApp(QMainWindow):
         self.menu_bar.addMenu(self.helpMenu)
 
     def makeChanges(self):
-        print('made changes')
         self.madeChanges = True
 
     def makeConnections(self):
@@ -232,7 +233,7 @@ class PyncilApp(QMainWindow):
         self.updateStatusBar()
         self.updateTitleBar()
         
-        if self.config.getboolean('Editor', 'ShowLineNumbers', fallback=False):
+        if self.settings.getboolean('Editor', 'ShowLineNumbers', fallback=False):
             self.numberBar.show()
         else:
             self.numberBar.hide()
@@ -445,7 +446,7 @@ class PyncilApp(QMainWindow):
                 return
 
         try:
-            python_path = self.config['Python']['Python2Path'] + 'python'
+            python_path = self.settings['Python']['Python2Path'] + 'python'
             isGUI = self.currentFileName.endswith('.pyw')
 
             if isGUI:
@@ -469,7 +470,7 @@ class PyncilApp(QMainWindow):
                 return
             
         try:
-            python_path = self.config['Python']['Python3Path'] + 'python'
+            python_path = self.settings['Python']['Python3Path'] + 'python'
             isGUI = self.currentFileName.endswith('.pyw')
 
             if isGUI:
@@ -486,10 +487,10 @@ class PyncilApp(QMainWindow):
     def tabify(self):
         try:
             text = self.editor.toPlainText()
-            if self.config.getboolean('Editor', 'UseSpaces'):
-                text = text.replace('\t', ' ' * self.config.getint('Editor', 'SpacesPerTab'))
+            if self.settings.getboolean('Editor', 'UseSpaces'):
+                text = text.replace('\t', ' ' * self.settings.getint('Editor', 'SpacesPerTab'))
             else:
-                text = text.replace(' ' * self.config.getint('Editor', 'SpacesPerTab'), '\t')
+                text = text.replace(' ' * self.settings.getint('Editor', 'SpacesPerTab'), '\t')
             self.editor.clear()
             self.editor.setText(text)
         except Exception as e:
@@ -511,8 +512,8 @@ class PyncilApp(QMainWindow):
         popup.showMessage(msg)
 
     def indent(self):
-        if self.config.getboolean('Editor', 'UseSpaces'):
-            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        if self.settings.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.settings.getint('Editor', 'SpacesPerTab')
         else:
             indentation = '\t'
         
@@ -566,8 +567,8 @@ class PyncilApp(QMainWindow):
             self.handleDedent(cursor)
 
     def handleDedent(self, cursor):
-        if self.config.getboolean('Editor', 'UseSpaces'):
-            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        if self.settings.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.settings.getint('Editor', 'SpacesPerTab')
         else:
             indentation = '\t'
 
@@ -590,8 +591,8 @@ class PyncilApp(QMainWindow):
         line = cursor.block().text()
 
         # Get the current level of indentation
-        if self.config.getboolean('Editor', 'UseSpaces'):
-            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        if self.settings.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.settings.getint('Editor', 'SpacesPerTab')
         else:
             indentation = '\t'
 
@@ -622,8 +623,8 @@ class PyncilApp(QMainWindow):
     def backspace(self):
         """Smart backspace function to compliment the smart enter"""
         return
-        if self.config.getboolean('Editor', 'UseSpaces'):
-            indentation = ' ' * self.config.getint('Editor', 'SpacesPerTab')
+        if self.settings.getboolean('Editor', 'UseSpaces'):
+            indentation = ' ' * self.settings.getint('Editor', 'SpacesPerTab')
         else:
             indentation = '\t'
 

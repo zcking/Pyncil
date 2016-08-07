@@ -6,8 +6,13 @@ class PreferencesDlg(QDialog):
     def __init__(self, parent=None):
         super(PreferencesDlg, self).__init__(parent)
 
+        self.settings = configparser.ConfigParser()
+        self.settings.read('config/settings.ini')
         self.config = configparser.ConfigParser()
-        self.config.read('config/settings.ini')
+        try:
+            self.config.read(self.settings['Editor']['theme'])
+        except:
+            self.config.read('config/themes/default.ini') # Use the default color theme
 
         self.makeWidgets()
         self.setInitialValues()
@@ -62,6 +67,7 @@ class PreferencesDlg(QDialog):
         self.spacesPerTab.setRange(1, 8)
         self.showLineNumbers = QCheckBox('Show Line Numbers')
         self.smartIndent = QCheckBox('Smart Indent')
+        self.themeBox = QLineEdit()
 
         # Editor Group
         self.editorLayout = QGridLayout()
@@ -77,6 +83,8 @@ class PreferencesDlg(QDialog):
         self.editorLayout.addWidget(self.spacesPerTab, 5, 1)
         self.editorLayout.addWidget(self.showLineNumbers, 6, 0)
         self.editorLayout.addWidget(self.smartIndent, 7, 0)
+        self.editorLayout.addWidget(QLabel('Theme:'), 8, 0)
+        self.editorLayout.addWidget(self.themeBox, 8, 1)
 
         self.editorGroupBox = QGroupBox('Editor')
         self.editorGroupBox.setLayout(self.editorLayout)
@@ -169,17 +177,18 @@ class PreferencesDlg(QDialog):
         self.mainLayout.addWidget(self.extensionsGroupBox)
 
     def setInitialValues(self):
-        self.fontBox.setText(self.config['Editor']['Font'])
-        self.fontSize.setValue(self.config.getint('Editor', 'FontSize'))
-        self.fixedPitchToggle.setChecked(self.config.getboolean('Editor', 'FixedPitch'))
-        self.wordSpacing.setValue(self.config.getfloat('Editor', 'WordSpacing'))
-        self.useSpaces.setChecked(self.config.getboolean('Editor', 'UseSpaces'))
-        self.spacesPerTab.setValue(self.config.getint('Editor', 'SpacesPerTab'))
-        self.showLineNumbers.setChecked(self.config.getboolean('Editor', 'ShowLineNumbers'))
-        self.smartIndent.setChecked(self.config.getboolean('Editor', 'smartindent'))
+        self.fontBox.setText(self.settings['Editor']['Font'])
+        self.fontSize.setValue(self.settings.getint('Editor', 'FontSize'))
+        self.fixedPitchToggle.setChecked(self.settings.getboolean('Editor', 'FixedPitch'))
+        self.wordSpacing.setValue(self.settings.getfloat('Editor', 'WordSpacing'))
+        self.useSpaces.setChecked(self.settings.getboolean('Editor', 'UseSpaces'))
+        self.spacesPerTab.setValue(self.settings.getint('Editor', 'SpacesPerTab'))
+        self.showLineNumbers.setChecked(self.settings.getboolean('Editor', 'ShowLineNumbers'))
+        self.smartIndent.setChecked(self.settings.getboolean('Editor', 'smartindent'))
+        self.themeBox.setText(self.settings['Editor']['theme'])
 
-        self.py2path.setText(self.config['Python']['Python2Path'])
-        self.py3path.setText(self.config['Python']['Python3Path'])
+        self.py2path.setText(self.settings['Python']['Python2Path'])
+        self.py3path.setText(self.settings['Python']['Python3Path'])
 
         self.bgInput.setText(self.config['Colors']['Background'])
         self.fgInput.setText(self.config['Colors']['Foreground'])
@@ -191,26 +200,27 @@ class PreferencesDlg(QDialog):
         self.highlightInput.setText(self.config['Colors']['Highlight'])
         self.highlightedTextInput.setText(self.config['Colors']['HighlightedText'])
 
-        self.highlighter.setText(self.config['Extensions']['Highlighter'])
+        self.highlighter.setText(self.settings['Extensions']['Highlighter'])
 
     def getValues(self):
         """Reads the values from the preference widgets and 
         stores them in the self.config ConfigParser object."""
-        self.config.set('Editor', 'Font', self.fontBox.text())
-        self.config.set('Editor', 'FontSize', str(self.fontSize.value()))
+        self.settings.set('Editor', 'Font', self.fontBox.text())
+        self.settings.set('Editor', 'FontSize', str(self.fontSize.value()))
         temp = 'yes' if self.fixedPitchToggle.isChecked() else 'no'
-        self.config.set('Editor', 'FixedPitch', temp)
-        self.config.set('Editor', 'WordSpacing', str(self.wordSpacing.value()))
+        self.settings.set('Editor', 'FixedPitch', temp)
+        self.settings.set('Editor', 'WordSpacing', str(self.wordSpacing.value()))
         temp = 'yes' if self.useSpaces.isChecked() else 'no'
-        self.config.set('Editor', 'UseSpaces', temp)
-        self.config.set('Editor', 'SpacesPerTab', str(self.spacesPerTab.value()))
+        self.settings.set('Editor', 'UseSpaces', temp)
+        self.settings.set('Editor', 'SpacesPerTab', str(self.spacesPerTab.value()))
         temp = 'yes' if self.showLineNumbers.isChecked() else 'no'
-        self.config.set('Editor', 'ShowLineNumbers', temp)
+        self.settings.set('Editor', 'ShowLineNumbers', temp)
         temp = 'yes' if self.smartIndent.isChecked() else 'no'
-        self.config.set('Editor', 'smartindent', temp)
+        self.settings.set('Editor', 'smartindent', temp)
+        self.settings.set('Editor', 'theme', self.themeBox.text())
 
-        self.config.set('Python', 'Python2Path', self.py2path.text())
-        self.config.set('Python', 'Python3Path', self.py3path.text())
+        self.settings.set('Python', 'Python2Path', self.py2path.text())
+        self.settings.set('Python', 'Python3Path', self.py3path.text())
 
         self.config.set('Colors', 'Background', self.bgInput.text())
         self.config.set('Colors', 'Foreground', self.fgInput.text())
@@ -276,6 +286,9 @@ class PreferencesDlg(QDialog):
 
         # save the config to file
         with open('config/settings.ini', 'w') as f:
+            self.settings.write(f)
+        # save the config to file
+        with open(self.settings['Editor']['theme'], 'w') as f:
             self.config.write(f)
 
         self.emit(SIGNAL('preferencesUpdated'))
