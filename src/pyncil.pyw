@@ -226,6 +226,11 @@ class PyncilApp(QMainWindow):
         # Update status bar and title bar
         self.updateStatusBar()
         self.updateTitleBar()
+        
+        if self.config.getboolean('Editor', 'ShowLineNumbers'):
+            self.numberBar.show()
+        else:
+            self.numberBar.hide()
 
         # Update text editor style
         self.setEditorStyle()
