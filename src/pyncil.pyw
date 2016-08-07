@@ -120,6 +120,7 @@ class PyncilApp(QMainWindow):
         # Initial UI Updates
         self.updateStatusBar()
         self.updateTitleBar()
+        self.madeChanges = False # UI Updates tend to trigger the textChanged signal. This counters that affect
 
     def setupEditor(self):
         self.editor = QTextEdit()
@@ -197,6 +198,7 @@ class PyncilApp(QMainWindow):
         self.menu_bar.addMenu(self.helpMenu)
 
     def makeChanges(self):
+        print('made changes')
         self.madeChanges = True
 
     def makeConnections(self):
@@ -230,7 +232,7 @@ class PyncilApp(QMainWindow):
         self.updateStatusBar()
         self.updateTitleBar()
         
-        if self.config.getboolean('Editor', 'ShowLineNumbers'):
+        if self.config.getboolean('Editor', 'ShowLineNumbers', fallback=False):
             self.numberBar.show()
         else:
             self.numberBar.hide()
@@ -244,6 +246,18 @@ class PyncilApp(QMainWindow):
         """Clears the text editor and sets the filename to 'Untitled'. 
         The first time the user tries to 'Save' the file, it will use the 
         'Save As' dialog."""
+        # Ask if want to save first, if changes have been made
+        if self.madeChanges:
+            reply = QMessageBox.question(self, "Save First?", 
+            'You have unsaved changes. Would you like to save them before closing this file?',
+                QMessageBox.Save | QMessageBox.Cancel)
+
+            if reply == QMessageBox.Save:
+                if self.firstSave:
+                    self.saveFileAs()
+                else:
+                    self.saveFile()
+
         self.editor.clear()
         self.currentFileName = 'Untitled'
         self.currentFilePath = os.getcwd()
@@ -254,6 +268,18 @@ class PyncilApp(QMainWindow):
         os.startfile(__file__) # Temporary solution?
 
     def openFile(self, path=None):
+        # Ask if want to save first, if changes have been made
+        if self.madeChanges:
+            reply = QMessageBox.question(self, "Save First?", 
+            'You have unsaved changes. Would you like to save them before closing this file?',
+                QMessageBox.Save | QMessageBox.Cancel)
+
+            if reply == QMessageBox.Save:
+                if self.firstSave:
+                    self.saveFileAs()
+                else:
+                    self.saveFile()
+
         if not path:
             path = QFileDialog.getOpenFileName(self, 'Open File', 
                 '', 'Python Files (*.py *.pyw)')
