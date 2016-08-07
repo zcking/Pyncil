@@ -55,6 +55,9 @@ class PyncilApp(QMainWindow):
         # Create the widgets
         self.makeWidgets()
 
+        # App Icon
+        self.setWindowIcon(QIcon('logo.png'))
+
     def loadConfig(self):
         self.config = configparser.ConfigParser()
         self.config.read('config/settings.ini')
@@ -333,7 +336,7 @@ class PyncilApp(QMainWindow):
             'You have unsaved changes. Would you like to save them before closing this file?',
                 QMessageBox.Save | QMessageBox.Cancel)
 
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.Save:
                 if self.firstSave:
                     self.saveFileAs()
                 else:
