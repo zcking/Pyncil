@@ -42,6 +42,7 @@ class PyncilApp(QMainWindow):
         self.currentFilePath = os.getcwd()
         self.firstSave = True
         self.findDlg = None
+        self.madeChanges = False
 
         # Load the configuration
         self.loadConfig()
@@ -157,7 +158,7 @@ class PyncilApp(QMainWindow):
         self.fileMenu.addAction('&Preferences', self.openPreferences)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction('&Close File', self.closeFile, 'Ctrl+W')
-        self.fileMenu.addAction('Close &Window', qApp.quit, 'Ctrl+Q')
+        self.fileMenu.addAction('Close &Window', self.quit, 'Ctrl+Q')
         self.menu_bar.addMenu(self.fileMenu)
 
     def setupEditMenu(self):
@@ -192,10 +193,14 @@ class PyncilApp(QMainWindow):
         self.helpMenu.addAction('&View Source', self.viewSource)
         self.menu_bar.addMenu(self.helpMenu)
 
+    def makeChanges(self):
+        self.madeChanges = True
+
     def makeConnections(self):
         # Status bar updates
         self.editor.cursorPositionChanged.connect(self.updateStatusBar)
         self.editor.textChanged.connect(self.updateStatusBar)
+        self.editor.textChanged.connect(self.makeChanges)
 
         # Title bar updates
         self.connect(self, SIGNAL('currentFileNameChanged'), self.updateTitleBar)
@@ -277,6 +282,8 @@ class PyncilApp(QMainWindow):
         with open(self.currentFilePath, 'w') as f:
             f.write(self.editor.toPlainText())
 
+        self.madeChanges = False
+
         self.emit(SIGNAL('currentFileNameChanged'))
         return True
 
@@ -291,6 +298,8 @@ class PyncilApp(QMainWindow):
 
         with open(self.currentFilePath, 'w') as f:
             f.write(self.editor.toPlainText())
+
+        self.madeChanges = False
 
         self.emit(SIGNAL('currentFileNameChanged'))
         return True
@@ -313,6 +322,18 @@ class PyncilApp(QMainWindow):
             self.emit(SIGNAL('currentFileNameChanged'))
 
     def closeFile(self):
+        # Ask if want to save first, if changes have been made
+        if self.madeChanges:
+            reply = QMessageBox.question(self, "Save First?", 
+            'You have unsaved changes. Would you like to save them before closing this file?',
+                QMessageBox.Save | QMessageBox.Cancel)
+
+            if reply == QMessageBox.Yes:
+                if self.firstSave:
+                    self.saveFileAs()
+                else:
+                    self.saveFile()
+
         self.currentFileName = 'Untitled'
         self.currentFilePath = os.getcwd()
         self.firstSave = True
@@ -581,6 +602,10 @@ class PyncilApp(QMainWindow):
         # Check if need to deploy smart backspace action
         col = cursor.columnNumber()
         # if col != 0 and line[col - 1] 
+
+    def quit(self):
+        self.closeFile()
+        qApp.quit()
 
 
 
