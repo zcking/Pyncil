@@ -291,6 +291,7 @@ class PreferencesDlg(QDialog):
         def update():
             color = colorDlg.currentColor()
             rVal, gVal, bVal, aVal = color.getRgb()
+            # Pad the hex string, if needed
             colorString = ''
             if rVal < 0x0F:
                 colorString += '0'
