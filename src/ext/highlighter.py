@@ -75,7 +75,210 @@ class PythonHighlighter(BaseHighlighter):
         self.commentEndExpression = self.commentEndRegex
 
         # For use by the main editor
-        self.indenters = ['def', 'for', 'class', 'if', 'else', 'elif', 'switch', 'case', 'try', 'except', 'finally']
+        self.indenters = ['def', 'for', 'while', 'do', 'class', 'if', 'else', 'elif', 'switch', 'case', 'try', 'except', 'finally']
+        self.dedenters = ['break', 'continue', 'return']
+
+    def highlightBlock(self, text):
+        for pattern, format in self.highlightingRules:
+            expression = QtCore.QRegExp(pattern)
+            index = expression.indexIn(text)
+            while index >= 0:
+                length = expression.matchedLength()
+                self.setFormat(index, length, format)
+                index = expression.indexIn(text, index + length)
+
+        self.setCurrentBlockState(0)
+
+        startIndex = 0
+        if self.previousBlockState() != 1:
+            startIndex = self.commentStartExpression.indexIn(text)
+
+        while startIndex >= 0:
+            endIndex = self.commentEndExpression.indexIn(text, startIndex)
+
+            if endIndex == -1:
+                self.setCurrentBlockState(1)
+                commentLength = len(text) - startIndex
+            else:
+                commentLength = endIndex - startIndex + self.commentEndExpression.matchedLength()
+
+            self.setFormat(startIndex, commentLength, self.multiLineCommentFormat)
+            startIndex = self.commentStartExpression.indexIn(text, startIndex + commentLength)
+
+    def getPatterns(self, filepath):
+        patterns = []
+        with open(filepath, 'r') as f:
+            for keyword in f:
+                patterns.append('\\b{}\\b'.format(keyword.strip()))
+        return patterns
+
+    def loadConfig(self):
+        self.settings = configparser.ConfigParser()
+        self.settings.read('config/settings.ini')
+        self.theme = configparser.ConfigParser() # The theme config
+        try:
+            self.theme.read(self.settings['Editor']['theme'])
+        except Exception as e:
+            self.theme.read('config/themes/default.ini')
+            self.makeErrorPopup(msg='Unable to load theme at path specified in settings.ini. Reverting to default theme.')
+
+
+    def getQColor(self, colorString):
+        try:
+            # Assume the string is hexadecimal RGB
+            rVal = int(colorString[:2], 16)
+            gVal = int(colorString[2:4], 16)
+            bVal = int(colorString[4:6], 16)
+            return QtGui.QColor(rVal, gVal, bVal)
+        except:
+            # Not hex string, so try a built-in QColor color
+            try:
+                return QtGui.QColor('#' + colorString)
+            except:
+                return None
+
+    def getPalette(self):
+        palette = QtGui.QPalette()
+
+        # Keywords
+        keywordColor = self.getQColor(self.theme['Colors']['Keyword'])
+        if keywordColor:
+            keywordFormat = QtGui.QTextCharFormat()
+            keywordFormat.setForeground(keywordColor)
+            self.highlightingRules += [(pattern, keywordFormat) for pattern in self.keywordPatterns]
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Keyword from settings')
+
+        # Background Color
+        bgColor = self.getQColor(self.theme['Colors']['Background'])
+        if bgColor:
+            palette.setColor(QtGui.QPalette.Base, bgColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Background from settings')
+
+        # Foreground Color
+        fgc = self.getQColor(self.theme['Colors']['Foreground'])
+        if fgc:
+            palette.setColor(QtGui.QPalette.Text, fgc)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Foreground from settings')
+
+        # Single Line Comments
+        lineCommentColor = self.getQColor(self.theme['Colors']['SingleLineComment'])
+        if lineCommentColor:
+            lineCommentFormat = QtGui.QTextCharFormat()
+            lineCommentFormat.setForeground(lineCommentColor)
+            self.highlightingRules.append((self.singleLineCommentRegex, lineCommentFormat))
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for SingleLineComment from settings')
+
+        # Block Comment
+        # blockCommentFormat = QtGui.QTextCharFormat()
+        # blockCommentFormat.setForeground(self.getQColor(self.theme['Colors']['MultiLineComment']))
+        # self.highlightingRules.append((self.multiLineCommentRegex, blockCommentFormat))
+
+        # Single Quotes
+        singleQuoteColor = self.getQColor(self.theme['Colors']['String'])
+        if singleQuoteColor:
+            singleQuoteFormat = QtGui.QTextCharFormat()
+            singleQuoteFormat.setForeground(singleQuoteColor)
+            self.highlightingRules.append((self.singleQuoteRegex, singleQuoteFormat))
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for String from settings')
+
+        # Double Quotes (uses same as single quote string)
+        if singleQuoteColor:
+            singleQuoteFormat = QtGui.QTextCharFormat()
+            singleQuoteFormat.setForeground(singleQuoteColor)
+            self.highlightingRules.append((self.doubleQuoteRegex, singleQuoteFormat))
+
+        # Functions
+        functionColor = self.getQColor(self.theme['Colors']['Function'])
+        if functionColor:
+            functionFormat = QtGui.QTextCharFormat()
+            functionFormat.setForeground(functionColor)
+            self.highlightingRules.append((self.functionRegex, functionFormat))
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Function from settings')
+
+        selectColor = self.getQColor(self.theme['Colors']['Highlight'])
+        if selectColor:
+            palette.setColor(QtGui.QPalette.Highlight, selectColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for Highlight from settings')
+
+        selectedTextColor = self.getQColor(self.theme['Colors']['HighlightedText'])
+        if selectedTextColor:
+            palette.setColor(QtGui.QPalette.HighlightedText, selectedTextColor)
+        else:
+            self.makeErrorPopup(msg='Unable to load the color for HighlightedText from settings')
+
+        return palette
+
+    def makeErrorPopup(self, title='Oops', msg='Something went wrong...'):
+        popup = QtGui.QErrorMessage(self)
+        popup.setWindowTitle(title)
+        popup.showMessage(msg)
+
+
+
+
+
+
+
+
+""" C++ Syntax Highlighter Class """
+class CPPHighlighter(BaseHighlighter):
+    def __init__(self, parent=None):
+        super(CPPHighlighter, self).__init__(parent)
+
+        self.parent = parent
+        self.loadConfig()
+
+        self.classRegex = QtCore.QRegExp("\\bQ[A-Za-z]+\\b")
+        self.singleLineCommentRegex = QtCore.QRegExp("//[^\n]*")
+        self.multiLineCommentRegex = None
+        self.singleQuoteRegex = QtCore.QRegExp("'.*'")
+        self.doubleQuoteRegex = QtCore.QRegExp("\".*\"")
+        self.functionRegex = QtCore.QRegExp("\\b[A-Za-z0-9_]+(?=\\()")
+        self.commentStartRegex = QtCore.QRegExp('/\\*')
+        self.commentEndRegex = QtCore.QRegExp('\\*/')
+
+        self.commentChar = '//'
+
+        keywordFormat = QtGui.QTextCharFormat()
+        keywordFormat.setFontWeight(QtGui.QFont.Bold)
+        self.keywordPatterns = self.getPatterns('ext/cpp_keywords.txt')
+        self.highlightingRules =[(QtCore.QRegExp(pattern), keywordFormat)
+                for pattern in self.keywordPatterns]
+
+        classFormat = QtGui.QTextCharFormat()
+        classFormat.setFontWeight(QtGui.QFont.Bold)
+        self.highlightingRules.append((self.classRegex, 
+            classFormat))
+
+        singleLineCommentFormat = QtGui.QTextCharFormat()
+        self.highlightingRules.append((self.singleLineCommentRegex, singleLineCommentFormat))
+
+        self.multiLineCommentFormat = QtGui.QTextCharFormat()
+
+        quotationFormat = QtGui.QTextCharFormat()
+        self.highlightingRules.append((self.doubleQuoteRegex,
+            quotationFormat))
+        self.highlightingRules.append((self.singleQuoteRegex,
+            quotationFormat))
+
+        functionFormat = QtGui.QTextCharFormat()
+        functionFormat.setFontItalic(True)
+        functionFormat.setForeground(QtCore.Qt.blue)
+        self.highlightingRules.append((self.functionRegex,
+            functionFormat))
+
+        self.commentStartExpression = self.commentStartRegex
+        self.commentEndExpression = self.commentEndRegex
+
+        # For use by the main editor
+        self.indenters = ['{', 'if', 'else', 'class', 'for', 'while', 'do', 'switch', 'case', 'try', 'catch', 'default']
         self.dedenters = ['break', 'continue', 'return']
 
     def highlightBlock(self, text):

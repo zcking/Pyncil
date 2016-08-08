@@ -283,6 +283,8 @@ class PreferencesDlg(QDialog):
         self.config.set('Colors', 'Highlight', self.highlightInput.text())
         self.config.set('Colors', 'HighlightedText', self.highlightedTextInput.text())
 
+        self.settings.set('Extensions', 'Highlighter', self.highlighter.text())
+
     def makeColorDlg(self, lineedit):
         colorDlg = QColorDialog(self)
         colorDlg.setCurrentColor(QColor('#' + lineedit.text()))
