@@ -251,13 +251,15 @@ class PyncilApp(QMainWindow):
         if self.madeChanges:
             reply = QMessageBox.question(self, "Save First?", 
             'You have unsaved changes. Would you like to save them before closing this file?',
-                QMessageBox.Save | QMessageBox.Cancel)
+                QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel)
 
             if reply == QMessageBox.Save:
                 if self.firstSave:
                     self.saveFileAs()
                 else:
                     self.saveFile()
+            elif reply == QMessageBox.Cancel:
+                return
 
         self.editor.clear()
         self.currentFileName = 'Untitled'
@@ -273,13 +275,15 @@ class PyncilApp(QMainWindow):
         if self.madeChanges:
             reply = QMessageBox.question(self, "Save First?", 
             'You have unsaved changes. Would you like to save them before closing this file?',
-                QMessageBox.Save | QMessageBox.Cancel)
+                QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel)
 
             if reply == QMessageBox.Save:
                 if self.firstSave:
                     self.saveFileAs()
                 else:
                     self.saveFile()
+            elif reply == QMessageBox.Cancel:
+                return
 
         if not path:
             path = QFileDialog.getOpenFileName(self, 'Open File', 
@@ -355,19 +359,22 @@ class PyncilApp(QMainWindow):
                 self.editor.setText(f.read())
 
             self.emit(SIGNAL('currentFileNameChanged'))
+            print(e)
 
     def closeFile(self):
         # Ask if want to save first, if changes have been made
         if self.madeChanges:
             reply = QMessageBox.question(self, "Save First?", 
             'You have unsaved changes. Would you like to save them before closing this file?',
-                QMessageBox.Save | QMessageBox.Cancel)
+                QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel)
 
             if reply == QMessageBox.Save:
                 if self.firstSave:
                     self.saveFileAs()
                 else:
                     self.saveFile()
+            elif reply == QMessageBox.Cancel:
+                return
 
         self.currentFileName = 'Untitled'
         self.currentFilePath = os.getcwd()

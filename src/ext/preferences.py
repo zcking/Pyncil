@@ -6,13 +6,7 @@ class PreferencesDlg(QDialog):
     def __init__(self, parent=None):
         super(PreferencesDlg, self).__init__(parent)
 
-        self.settings = configparser.ConfigParser()
-        self.settings.read('config/settings.ini')
-        self.config = configparser.ConfigParser()
-        try:
-            self.config.read(self.settings['Editor']['theme'])
-        except:
-            self.config.read('config/themes/default.ini') # Use the default color theme
+        self.loadConfig()
 
         self.makeWidgets()
         self.setInitialValues()
@@ -20,6 +14,24 @@ class PreferencesDlg(QDialog):
         self.setWindowTitle('Preferences')
 
         self.connect(self, SIGNAL('returnPressed()'), self.save)
+
+    def loadConfig(self):
+        self.settings = configparser.ConfigParser()
+        self.settings.read('config/settings.ini')
+        try:
+            self.theme = self.themeBox.text()
+        except:
+            self.theme = ''
+        if self.theme == '':
+            self.theme = self.settings.get('Editor', 'theme', fallback='config/themes/default.ini')
+
+        self.config = configparser.ConfigParser()
+        try:
+            self.config.read(self.settings['Editor']['theme'])
+            self.settings['Editor']['theme'] = self.theme
+        except:
+            self.config.read('config/themes/default.ini') # Use the default color theme
+            self.settings['Editor']['theme'] = self.theme
 
     def makeWidgets(self):
         self.mainLayout = QVBoxLayout()
@@ -204,7 +216,10 @@ class PreferencesDlg(QDialog):
 
     def getValues(self):
         """Reads the values from the preference widgets and 
-        stores them in the self.config ConfigParser object."""
+        stores them in the self.settings and self.config ConfigParser object."""
+        # Get correct config/theme
+        self.loadConfig()
+
         self.settings.set('Editor', 'Font', self.fontBox.text())
         self.settings.set('Editor', 'FontSize', str(self.fontSize.value()))
         temp = 'yes' if self.fixedPitchToggle.isChecked() else 'no'
