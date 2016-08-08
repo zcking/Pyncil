@@ -23,7 +23,7 @@ class PreferencesDlg(QDialog):
         self.settings = configparser.ConfigParser()
         self.settings.read('config/settings.ini')
         try:
-            self.theme = 'config/themes/' + self.themeBox.currentText()
+            self.theme = 'config/themes/' + self.themeBox.currentText() + '.ini'
         except:
             self.theme = ''
         if self.theme == '':
@@ -76,7 +76,7 @@ class PreferencesDlg(QDialog):
         themes = []
         for file in os.listdir('config/themes/'):
             if file.endswith('.ini'):
-                themes.append(file)
+                themes.append(file[:-4])
         return themes
 
     def setColorValues(self):
@@ -115,7 +115,7 @@ class PreferencesDlg(QDialog):
         self.themeBox = QComboBox()
         themes = self.getThemes()
         self.themeBox.addItems(themes)
-        self.themeBox.setCurrentIndex(themes.index(self.settings['Editor']['theme'].split('/')[-1])) # Set the current item to the the current theme
+        self.themeBox.setCurrentIndex(themes.index(self.settings['Editor']['theme'].split('/')[-1][:-4])) # Set the current item to the the current theme (without the path and .ini part)
         self.themeBox.activated.connect(self.themeSelected)
 
         # Editor Group
@@ -268,7 +268,7 @@ class PreferencesDlg(QDialog):
         self.settings.set('Editor', 'ShowLineNumbers', temp)
         temp = 'yes' if self.smartIndent.isChecked() else 'no'
         self.settings.set('Editor', 'smartindent', temp)
-        self.settings.set('Editor', 'theme', 'config/themes/' + self.themeBox.currentText())
+        self.settings.set('Editor', 'theme', 'config/themes/' + self.themeBox.currentText() + '.ini')
 
         self.settings.set('Python', 'Python2Path', self.py2path.text())
         self.settings.set('Python', 'Python3Path', self.py3path.text())
