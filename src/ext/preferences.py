@@ -1,6 +1,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import configparser
+import os
 
 class PreferencesDlg(QDialog):
     def __init__(self, parent=None):
@@ -16,10 +17,13 @@ class PreferencesDlg(QDialog):
         self.connect(self, SIGNAL('returnPressed()'), self.save)
 
     def loadConfig(self):
+        self.config = None
+        self.settings = None
+
         self.settings = configparser.ConfigParser()
         self.settings.read('config/settings.ini')
         try:
-            self.theme = self.themeBox.text()
+            self.theme = 'config/themes/' + self.themeBox.currentText()
         except:
             self.theme = ''
         if self.theme == '':
@@ -27,7 +31,7 @@ class PreferencesDlg(QDialog):
 
         self.config = configparser.ConfigParser()
         try:
-            self.config.read(self.settings['Editor']['theme'])
+            self.config.read(self.theme)
             self.settings['Editor']['theme'] = self.theme
         except:
             self.config.read('config/themes/default.ini') # Use the default color theme
@@ -66,6 +70,35 @@ class PreferencesDlg(QDialog):
         self.saveButton.clicked.connect(self.save)
         self.cancelButton.clicked.connect(self.cancel)
 
+    def getThemes(self):
+        """Parse through the theme dir and get the themes names as strings.
+        Returns a list (of theme names)."""
+        themes = []
+        for file in os.listdir('config/themes/'):
+            if file.endswith('.ini'):
+                themes.append(file)
+        return themes
+
+    def setColorValues(self):
+        # Get the theme
+        self.loadConfig()
+
+        # Set the widget values
+        self.bgInput.setText(self.config['Colors']['Background'])
+        self.fgInput.setText(self.config['Colors']['Foreground'])
+        self.singleInput.setText(self.config['Colors']['SingleLineComment'])
+        self.multiInput.setText(self.config['Colors']['MultiLineComment'])
+        self.stringInput.setText(self.config['Colors']['String'])
+        self.keywordInput.setText(self.config['Colors']['Keyword'])
+        self.functionInput.setText(self.config['Colors']['Function'])
+        self.highlightInput.setText(self.config['Colors']['Highlight'])
+        self.highlightedTextInput.setText(self.config['Colors']['HighlightedText'])
+
+    def themeSelected(self):
+        # Theme has been selected, now update the other theme setting widgets
+        # to contain *that* theme's colors
+        self.setColorValues()
+
     def setupEditorWidgets(self):
         # Editor widgets
         self.fontBox = QLineEdit()
@@ -79,7 +112,11 @@ class PreferencesDlg(QDialog):
         self.spacesPerTab.setRange(1, 8)
         self.showLineNumbers = QCheckBox('Show Line Numbers')
         self.smartIndent = QCheckBox('Smart Indent')
-        self.themeBox = QLineEdit()
+        self.themeBox = QComboBox()
+        themes = self.getThemes()
+        self.themeBox.addItems(themes)
+        self.themeBox.setCurrentIndex(themes.index(self.settings['Editor']['theme'].split('/')[-1])) # Set the current item to the the current theme
+        self.themeBox.activated.connect(self.themeSelected)
 
         # Editor Group
         self.editorLayout = QGridLayout()
@@ -197,7 +234,6 @@ class PreferencesDlg(QDialog):
         self.spacesPerTab.setValue(self.settings.getint('Editor', 'SpacesPerTab'))
         self.showLineNumbers.setChecked(self.settings.getboolean('Editor', 'ShowLineNumbers'))
         self.smartIndent.setChecked(self.settings.getboolean('Editor', 'smartindent'))
-        self.themeBox.setText(self.settings['Editor']['theme'])
 
         self.py2path.setText(self.settings['Python']['Python2Path'])
         self.py3path.setText(self.settings['Python']['Python3Path'])
@@ -232,7 +268,7 @@ class PreferencesDlg(QDialog):
         self.settings.set('Editor', 'ShowLineNumbers', temp)
         temp = 'yes' if self.smartIndent.isChecked() else 'no'
         self.settings.set('Editor', 'smartindent', temp)
-        self.settings.set('Editor', 'theme', self.themeBox.text())
+        self.settings.set('Editor', 'theme', 'config/themes/' + self.themeBox.currentText())
 
         self.settings.set('Python', 'Python2Path', self.py2path.text())
         self.settings.set('Python', 'Python3Path', self.py3path.text())
