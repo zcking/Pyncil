@@ -2,6 +2,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import configparser
 import os
+from . import highlighter as HL
 
 class PreferencesDlg(QDialog):
     def __init__(self, parent=None):
@@ -98,6 +99,17 @@ class PreferencesDlg(QDialog):
         # Theme has been selected, now update the other theme setting widgets
         # to contain *that* theme's colors
         self.setColorValues()
+
+    def getHighlighters(self):
+        """Parse through the highlighter.py file and get the highlighter class names as strings.
+        Returns a list (of class names)."""
+        highlighters = []
+        classes = dir(HL)
+        classes.remove('BaseHighlighter') # Ignore the base class
+        for highlighter in classes:
+            if highlighter.endswith('Highlighter'):
+                highlighters.append(highlighter)
+        return highlighters
 
     def setupEditorWidgets(self):
         # Editor widgets
@@ -213,7 +225,10 @@ class PreferencesDlg(QDialog):
 
     def setupExtensionsWidgets(self):
         # Extensions Widgets
-        self.highlighter = QLineEdit()
+        highlighters = self.getHighlighters()
+        self.highlighter = QComboBox()
+        self.highlighter.addItems(highlighters)
+        self.highlighter.setCurrentIndex(highlighters.index(self.settings['Extensions']['highlighter'])) # Set the current item to the the current theme (without the path and .ini part)
 
         # Extensions Layout
         self.extensionsLayout = QGridLayout()
@@ -248,7 +263,8 @@ class PreferencesDlg(QDialog):
         self.highlightInput.setText(self.config['Colors']['Highlight'])
         self.highlightedTextInput.setText(self.config['Colors']['HighlightedText'])
 
-        self.highlighter.setText(self.settings['Extensions']['Highlighter'])
+        highlighters = self.getHighlighters()
+        self.highlighter.setCurrentIndex(highlighters.index(self.settings['Extensions']['highlighter'])) # Set the current item to the the current theme (without the path and .ini part)
 
     def getValues(self):
         """Reads the values from the preference widgets and 
@@ -283,7 +299,7 @@ class PreferencesDlg(QDialog):
         self.config.set('Colors', 'Highlight', self.highlightInput.text())
         self.config.set('Colors', 'HighlightedText', self.highlightedTextInput.text())
 
-        self.settings.set('Extensions', 'Highlighter', self.highlighter.text())
+        self.settings.set('Extensions', 'Highlighter', self.highlighter.currentText())
 
     def makeColorDlg(self, lineedit):
         colorDlg = QColorDialog(self)

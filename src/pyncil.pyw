@@ -20,6 +20,7 @@ import configparser
 from multiprocessing import Process
 import webbrowser
 import tempfile
+import traceback
 
 from ext import *
 from ext import highlighter
@@ -360,6 +361,7 @@ class PyncilApp(QMainWindow):
 
             self.emit(SIGNAL('currentFileNameChanged'))
             print(e)
+            traceback.print_exc()
 
     def closeFile(self):
         # Ask if want to save first, if changes have been made
@@ -503,6 +505,7 @@ class PyncilApp(QMainWindow):
         except Exception as e:
             self.makeErrorPopup(msg='Unable to fix indentation')
             print(e)
+            traceback.print_exc()
 
     def about(self):
         webbrowser.open('https://github.com/zach-king/Pyncil/blob/master/README.md')
