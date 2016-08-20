@@ -403,7 +403,6 @@ class PyncilApp(QMainWindow):
     def selectAll(self):
         cursor = self.editor.textCursor()
         cursor.setPosition(QTextCursor.Start)
-        # cursor.selec/
         self.editor.selectAll()
 
     def comment(self):     
@@ -455,13 +454,19 @@ class PyncilApp(QMainWindow):
                 return
 
         try:
+            # Create the temporary file
+            fp = tempfile.TemporaryFile()
+            text = self.editor.toPlainText().encode()
+            suffix = self.currentFileName.split('.')[-1]
+            fp.write(suffix=suffix, text=text)
+
             python_path = self.settings['Python']['Python2Path'] + 'python'
-            isGUI = self.currentFileName.endswith('.pyw')
+            isGUI = suffix == 'pyw'
 
             if isGUI:
                 python_path += 'w'
             
-            if self.currentFileName.endswith('.py') or isGUI:
+            if suffix == '.py' or isGUI:
                 os.system(python_path + ' -i ' + self.currentFilePath)
             else:
                 self.makeErrorPopup(msg='The current file ({}) is not a Python file'.format(self.currentFileName))
